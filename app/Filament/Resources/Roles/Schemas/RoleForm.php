@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Roles\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Group;
@@ -35,7 +36,7 @@ class RoleForm
             if ($role && $role->name === 'SUPER ADMIN') {
                 $protectedPermissionNames = [
                     'admin.manage_roles',
-                    'admin.manage_users', 
+                    //'admin.manage_users', 
                 ];
             }
         }
@@ -53,14 +54,14 @@ class RoleForm
             $section = Section::make($group)
                 ->collapsed(false)
                 ->schema([
-                    CheckboxList::make("permissions.{$group}")
+                    CheckboxList::make("role_permissions.{$group}")
                         ->options($perms->pluck('action', 'id'))
                         ->columns(2) 
-                        ->searchable()
+                        //->searchable()
                         ->bulkToggleable()
                         ->descriptions($perms->pluck('description', 'id'))
-                        ->disableOptionWhen(fn (string $value): bool => in_array($value, $protectedIds))
-                        ->label(false),
+                        //->disableOptionWhen(fn (string $value): bool => in_array($value, $protectedIds))
+                        ->hiddenLabel(),
                 ]);
 
             if ($iteration % 2 === 0) {
@@ -75,7 +76,9 @@ class RoleForm
             ->components([
                 TextInput::make('name')
                     ->label('Nombre del Rol')
-                    ->required(),                
+                    ->disabled(fn ($record) => $record?->name === 'SUPER ADMIN')
+                    ->required(),
+                
 
                 Grid::make(2)
                     ->schema([

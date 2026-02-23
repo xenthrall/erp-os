@@ -36,7 +36,7 @@ class RolesTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->visible(fn() => Auth::user()?->can('role.edit')),
+                    ->visible(fn() => Auth::user()?->can('admin.manage_roles')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

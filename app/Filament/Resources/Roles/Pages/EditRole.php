@@ -16,9 +16,8 @@ class EditRole extends EditRecord
 
     protected function getHeaderActions(): array
     {
-         $actions = [];
+        $actions = [];
 
-        // Solo mostrar el botón "Eliminar" si el usuario tiene permiso
         if (Auth::user()?->can('admin.manage_roles')) {
             $actions[] = DeleteAction::make()
                 ->label('Eliminar Rol');
@@ -27,20 +26,47 @@ class EditRole extends EditRecord
         return $actions;
     }
 
-
-   protected function mutateFormDataBeforeSave(array $data): array
+    protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Extraer IDs de permisos desde el array anidado
-        $nested = $data['permissions'] ?? [];
+        $nested = $data['role_permissions'] ?? [];
 
-        $this->permissionsToSync = collect($nested)
-            ->flatMap(fn ($arr) => is_array($arr) ? $arr : [])
+        // 1. Obtenemos los permisos que el formulario envió (forzados a String para evitar errores)
+        $submittedPermissions = collect($nested)
+            ->flatMap(fn($arr) => is_array($arr) ? $arr : [])
             ->filter()
             ->values()
-            ->all();
+            ->map(fn($id) => (string) $id)
+            ->toArray();
 
-        unset($data['permissions']);
+        // 2. lista estricta de permisos sensibles
+        $sensitivePermissionNames = [
+            'admin.manage_roles',
+        ];
+        //si el rol es SUper Admin definimos una lista de permisos sensibles más amplia
+        if ($this->record->name === 'SUPER ADMIN') {
+            $sensitivePermissionNames = [
+                'admin.manage_roles',
+                'admin.manage_users',
+            ];
+        }
 
+        // 3. Obtenemos los IDs reales de esos permisos en la BD
+        $sensitiveIds = Permission::whereIn('name', $sensitivePermissionNames)
+            ->pluck('id')
+            ->map(fn($id) => (string) $id)
+            ->toArray();
+
+        // 4. APLICAMOS LA PROTECCIÓN DEL BACKEND
+        if ($this->record->name === 'SUPER ADMIN') {
+            // Si es Super Admin, unimos lo enviado + los sensibles (así garantizamos que nunca los pierda)
+            $this->permissionsToSync = array_unique(array_merge($submittedPermissions, $sensitiveIds));
+        } else {
+            // Si NO es Super Admin, le restamos los IDs sensibles a lo que haya enviado
+            $this->permissionsToSync = array_diff($submittedPermissions, $sensitiveIds);
+        }
+
+        // 5. Limpiamos el array temporal de Filament para no causar error en SQLite
+        unset($data['role_permissions']);
         return $data;
     }
 
@@ -50,24 +76,22 @@ class EditRole extends EditRecord
             $permissions = Permission::whereIn('id', $this->permissionsToSync)->get();
             $this->record->syncPermissions($permissions);
         } else {
-            $this->record->syncPermissions([]); // Limpia todos si no hay seleccionados
+            $this->record->syncPermissions([]); 
         }
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Esto rellena los permisos actuales 
         $ids = $this->record->permissions()->pluck('id')->toArray();
 
         $grouped = Permission::whereIn('id', $ids)
             ->get()
             ->groupBy('group')
-            ->map(fn ($items) => $items->pluck('id')->toArray())
+            ->map(fn($items) => $items->pluck('id')->map(fn($id) => (string) $id)->toArray()) // Forzamos a string aquí también
             ->toArray();
 
-        $data['permissions'] = $grouped;
+        $data['role_permissions'] = $grouped;
 
         return $data;
     }
-
 }
