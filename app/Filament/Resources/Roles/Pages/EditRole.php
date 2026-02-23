@@ -7,6 +7,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
+use Filament\Notifications\Notification;
+use Spatie\Permission\Models\Role;
 
 class EditRole extends EditRecord
 {
@@ -20,7 +22,27 @@ class EditRole extends EditRecord
 
         if (Auth::user()?->can('admin.manage_roles')) {
             $actions[] = DeleteAction::make()
-                ->label('Eliminar Rol');
+                ->disabled(function (Role $record) {
+                    return $record->users()->exists();
+                })
+                ->tooltip(function (Role $record) {
+                    if ($record->users()->exists()) {
+                        return 'No se puede eliminar porque hay usuarios usando este rol';
+                    }
+                    return null;
+                })
+                ->before(function (Role $record, DeleteAction $action) {
+                    if ($record->users()->exists()) {
+                        Notification::make()
+                            ->title('No se puede eliminar el rol')
+                            ->body('Este rol está asignado a uno o más usuarios en el sistema. Debe quitarle este rol a esos usuarios antes de poder eliminarlo.')
+                            ->danger()
+                            ->duration(8000)
+                            ->send();
+
+                        $action->cancel();
+                    }
+                });
         }
 
         return $actions;
