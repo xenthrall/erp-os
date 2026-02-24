@@ -33,10 +33,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile(isSimple: false)
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->renderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
-                fn () => View::make('filament.login.custom')
+                fn() => View::make('filament.login.custom')
             )
             ->profile()
             ->colors([
@@ -51,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
             // 3. BRANDING (LOGO Y FAVICON)
             ->brandLogo(asset('images/logo-operacion-sistemica-light.webp'))
             ->darkModeBrandLogo(asset('images/logo-operacion-sistemica-dark.webp'))
-            ->brandLogoHeight('2.5rem') 
+            ->brandLogoHeight('2.5rem')
             ->favicon(asset('favicon.svg'))
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -65,9 +66,17 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Gestión Disciplinaria')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Recursos Humanos')
                     ->icon('heroicon-o-briefcase')
                     ->collapsed(),
+                NavigationGroup::make()
+                    ->label('sistema')
+                    ->collapsed(),
+                
 
             ])
             ->middleware([
@@ -81,6 +90,10 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->topNavigation() //Habilitar la barra de navegación superior
+
+            //->sidebarCollapsibleOnDesktop()
+
             ->authMiddleware([
                 Authenticate::class,
             ]);
