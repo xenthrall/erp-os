@@ -20,6 +20,9 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\View;
+use Filament\Navigation\NavigationGroup;
+
+
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -59,6 +62,13 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
+            ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Recursos Humanos')
+                    ->icon('heroicon-o-briefcase')
+                    ->collapsed(),
+
             ])
             ->middleware([
                 EncryptCookies::class,

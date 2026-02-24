@@ -13,13 +13,18 @@ return new class extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
+
+            //relacion 1:1 con users
             $table->foreignId('user_id')
-                ->constrained()
-                ->onDelete('restrict');
+                ->nullable()
+                ->unique()
+                ->constrained('users')
+                ->restrictOnDelete();
 
             $table->foreignId('department_id')
-                ->constrained()
-                ->onDelete('restrict');
+                ->nullable()
+                ->constrained('departments')
+                ->restrictOnDelete();
 
             $table->string('full_name');
             $table->string('document_number')->unique();

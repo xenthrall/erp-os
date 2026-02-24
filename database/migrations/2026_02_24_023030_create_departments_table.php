@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_id')
-                ->constrained()
-                ->onDelete('restrict');
+                ->constrained('branches')
+                ->restrictOnDelete();
                 
             $table->string('name');
             $table->boolean('is_active')->default(true);
