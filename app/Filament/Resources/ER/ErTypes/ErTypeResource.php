@@ -54,12 +54,33 @@ class ErTypeResource extends Resource
                     ])
                     ->required()
                     ->placeholder('Selecciona la gravedad'),
+                Toggle::make('has_commission_penalty')
+                    ->label('¿Aplica penalización de comisión?')
+                    ->default(false)
+                    ->reactive(),
+
+                TextInput::make('commission_penalty_percentage')
+                    ->label('Porcentaje de penalización de comisión')
+                    ->numeric()
+                    ->suffix('%')
+                    ->minValue(0)
+                    ->maxValue(100)
+                    ->step(0.01)
+                    ->visible(fn($get) => $get('has_commission_penalty'))
+                    ->required(fn($get) => $get('has_commission_penalty'))
+                    ->rules([
+                        'nullable',
+                        'numeric',
+                        'min:0',
+                        'max:100',
+                    ]),
 
                 Textarea::make('description')
                     ->label('Descripción')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('¿Activo?')
+                    ->default(true)
                     ->required(),
             ]);
     }
@@ -89,6 +110,15 @@ class ErTypeResource extends Resource
                         'critico' => 'gray',     // oscuro
                     })
                     ->searchable(),
+                TextColumn::make('has_commission_penalty')
+                    ->label('Penalización Comisión')
+                    ->formatStateUsing(function ($state, $record) {
+                        return $state
+                            ? number_format($record->commission_penalty_percentage, 2) . '%'
+                            : 'N/A';
+                    })
+                    ->color(fn($state) => $state ? 'danger' : 'gray')
+                    ->alignCenter(),
 
                 IconColumn::make('is_active')
                     ->label('Activo')

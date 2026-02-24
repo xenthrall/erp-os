@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('severity'); // low, medium, high
+            $table->boolean('has_commission_penalty')->default(false);
+            $table->decimal('commission_penalty_percentage', 5, 2)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

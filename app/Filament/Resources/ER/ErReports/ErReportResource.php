@@ -129,6 +129,16 @@ class ErReportResource extends Resource
                     ->money('COP')
                     ->color(fn ($state) => $state > 0 ? 'danger' : null)
                     ->sortable(),
+                TextColumn::make('type.has_commission_penalty')
+                    ->label('Penalización Comisión')
+                    ->formatStateUsing(function ($state, $record) {
+                        return $state
+                            ? number_format($record->type->commission_penalty_percentage, 2) . '%'
+                            : 'N/A';
+                    })
+                    ->color(fn($state) => $state ? 'danger' : 'gray')
+                    ->alignCenter(),
+
                 TextColumn::make('description')
                     ->label('Descripción')
                     ->limit(50)

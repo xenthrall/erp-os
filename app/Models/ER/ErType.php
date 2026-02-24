@@ -11,6 +11,8 @@ class ErType extends Model
         'name',
         'description',
         'severity',
+        'has_commission_penalty',
+        'commission_penalty_percentage',
         'is_active',
     ];
 
