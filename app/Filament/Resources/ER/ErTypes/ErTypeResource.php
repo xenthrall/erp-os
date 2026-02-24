@@ -6,6 +6,8 @@ use App\Filament\Resources\ER\ErTypes\Pages\ManageErTypes;
 use App\Models\ER\ErType;
 use BackedEnum;
 use Dom\Text;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -92,15 +94,16 @@ class ErTypeResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label('Nombre')
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('severity')
                     ->label('Gravedad')
                     ->badge()
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'leve' => 'Leve',
-                        'moderado' => 'Moderado',
-                        'grave' => 'Grave',
-                        'critico' => 'Crítico',
+                        'leve' => '🟢 Leve',
+                        'moderado' => '🟡 Moderado',
+                        'grave' => '🔴 Grave',
+                        'critico' => '💥 Crítico',
                         default => $state,
                     })
                     ->color(fn($state) => match ($state) {
@@ -143,8 +146,10 @@ class ErTypeResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([]),
