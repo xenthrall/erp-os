@@ -2,20 +2,19 @@
 
 namespace App\Filament\Resources\ER\ErReports;
 
+use App\Filament\Actions\ER\UploadEvidenceAction;
 use App\Filament\Resources\ER\ErReports\Pages\ManageErReports;
 use App\Models\ER\ErReport;
-use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -63,7 +62,6 @@ class ErReportResource extends Resource
                     ->label('Descripción')
                     ->required()
                     ->columnSpanFull(),
-                
             ]);
     }
 
@@ -83,35 +81,37 @@ class ErReportResource extends Resource
                 TextColumn::make('type.severity')
                     ->label('Gravedad')
                     ->badge()
-                    ->formatStateUsing(fn($state) => match ($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
                         'leve' => '🟢 Leve',
                         'moderado' => '🟡 Moderado',
                         'grave' => '🔴 Grave',
                         'critico' => '💥 Crítico',
                         default => $state,
                     })
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn ($state) => match ($state) {
                         'leve' => 'success',     // verde
                         'moderado' => 'warning', // amarillo
                         'grave' => 'danger',     // rojo
                         'critico' => 'gray',     // oscuro
                     })
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
 
                 TextColumn::make('reporter.name')
                     ->label('Reportado por')
-                    ->searchable(),
-                
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->formatStateUsing(fn($state) => match ($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
                         'abierto' => 'Abierto',
                         'en_proceso' => 'En proceso',
                         'cerrado' => 'Cerrado',
                         default => $state,
                     })
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn ($state) => match ($state) {
                         'abierto' => 'danger',     // rojo
                         'en_proceso' => 'warning', // amarillo
                         'cerrado' => 'success',     // verde
@@ -125,24 +125,33 @@ class ErReportResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('discount_amount')
-                    ->label('Monto de descuento')
+                    ->label('Monto')
                     ->money('COP')
                     ->color(fn ($state) => $state > 0 ? 'danger' : null)
-                    ->sortable(),
+                    ->toggleable(isToggledHiddenByDefault: false),
+
                 TextColumn::make('type.has_commission_penalty')
-                    ->label('Penalización Comisión')
+                    ->label('Penalización')
                     ->formatStateUsing(function ($state, $record) {
                         return $state
-                            ? number_format($record->type->commission_penalty_percentage, 2) . '%'
+                            ? number_format($record->type->commission_penalty_percentage, 2).'%'
                             : 'N/A';
                     })
-                    ->color(fn($state) => $state ? 'danger' : 'gray')
+                    ->color(fn ($state) => $state ? 'danger' : 'gray')
+                    ->toggleable(isToggledHiddenByDefault: false)
                     ->alignCenter(),
 
                 TextColumn::make('description')
                     ->label('Descripción')
                     ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('attachments_count')
+                    ->counts('attachments')
+                    ->label('Evidencias')
+                    ->badge()
+                    ->color(fn ($state): string => $state > 0 ? 'info' : 'gray')
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: false),
 
                 TextColumn::make('created_at')
                     ->label('Creado en')
@@ -159,13 +168,14 @@ class ErReportResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    UploadEvidenceAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-
-                ]),
+                BulkActionGroup::make([]),
             ]);
     }
 
