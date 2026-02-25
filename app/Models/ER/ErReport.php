@@ -18,7 +18,14 @@ class ErReport extends Model
         'status',
         'event_date',
         'description',
+        'solution',
+        'references',
         'discount_amount',
+    ];
+
+    protected $casts = [
+        'event_date' => 'date',
+        'references' => 'array',
     ];
 
     public function type()

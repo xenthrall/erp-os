@@ -16,7 +16,7 @@ class ErType extends Model
         'is_active',
     ];
 
-    public function reports()
+    public function errorReports()
     {
         return $this->hasMany(ErReport::class);
     }
