@@ -25,10 +25,12 @@ return new class extends Migration
                 ->constrained('employees')
                 ->restrictOnDelete();
 
-            $table->string('status');
+            $table->string('status')->nullable();
 
             $table->date('event_date');
             $table->text('description');
+            $table->text('solution')->nullable();
+            $table->json('references')->nullable();
 
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->timestamps();

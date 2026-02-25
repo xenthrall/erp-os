@@ -25,7 +25,7 @@ class ViewErReport extends Page
             'type', 
             'reporter', 
             'employee', 
-            'notes', 
+            'notes.user', 
             'attachments'
         ]);
     }

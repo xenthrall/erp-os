@@ -19,7 +19,12 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use App\Filament\Resources\ER\ErReports\Pages\ViewErReport;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\FileUpload;
 
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Section;
+use Filament\Schemas\Components\Grid;
 
 
 class ErReportResource extends Resource
@@ -62,10 +67,89 @@ class ErReportResource extends Resource
                     ->required()
                     ->numeric()
                     ->default(0),
+                CheckboxList::make('references_enabled')
+                    ->label('Qué referencias quieres agregar')
+                    ->options([
+                        'invoice' => 'Factura',
+                        'ticket'  => 'Ticket',
+                        'order'   => 'Orden',
+                    ])
+                    ->afterStateHydrated(function (CheckboxList $component, ?Model $record) {        
+
+                        $selected = [];
+                        $references = $record->references ?? []; // Obtenemos el JSON
+
+                        // Verificamos si la clave existe y tiene algún dato dentro
+                        if (!empty($references['invoice'])) $selected[] = 'invoice';
+                        if (!empty($references['ticket']))  $selected[] = 'ticket';
+                        if (!empty($references['order']))   $selected[] = 'order';
+
+                        $component->state($selected);
+                    })
+                    ->columns(3)
+                    ->reactive()
+                    ->dehydrated(false),
+
+                Grid::make(2)
+                    ->schema([
+                        TextInput::make('references.invoice.number')
+                            ->label('Número de factura')
+                            ->visible(fn($get) => in_array('invoice', $get('references_enabled') ?? [])),
+
+                        TextInput::make('references.invoice.url')
+                            ->label('Enlace de factura')
+                            ->url()
+                            ->visible(fn($get) => in_array('invoice', $get('references_enabled') ?? [])),
+
+                        TextInput::make('references.ticket.number')
+                            ->label('Número de ticket')
+                            ->visible(fn($get) => in_array('ticket', $get('references_enabled') ?? [])),
+
+                        TextInput::make('references.ticket.url')
+                            ->label('Enlace de ticket')
+                            ->url()
+                            ->visible(fn($get) => in_array('ticket', $get('references_enabled') ?? [])),
+
+                        TextInput::make('references.order.number')
+                            ->label('Número de orden')
+                            ->visible(fn($get) => in_array('order', $get('references_enabled') ?? [])),
+                        TextInput::make('references.order.url')
+                            ->label('Enlace de orden')
+                            ->url()
+                            ->visible(fn($get) => in_array('order', $get('references_enabled') ?? [])),
+                    ]),
+
                 Textarea::make('description')
                     ->label('Descripción')
+                    ->placeholder('Describe lo ocurrido, el impacto y cualquier detalle relevante')
                     ->required()
                     ->columnSpanFull(),
+                Textarea::make('solution')
+                    ->label('Solución / Acción preventiva')
+                    ->placeholder('¿Qué evitarará que este error vuelva a ocurrir?')
+                    ->columnSpanFull(),
+
+                Repeater::make('attachments')
+                    ->label('Evidencias')
+                    ->relationship()
+                    ->maxItems(3)
+                    ->schema([
+                        FileUpload::make('path')
+                            ->label('Archivo')
+                            ->disk('public')
+                            ->directory('er-reports')
+                            ->visibility('public')
+                            ->preserveFilenames()
+                            ->openable()
+                            ->panelLayout('list')
+                            ->maxFiles(1)
+                            ->imagePreviewHeight('150px')
+                            ->maxSize(10240)
+                            ->downloadable(),
+                    ])
+                    ->columnSpanFull()
+                    ->collapsible()
+                    ->itemLabel(fn() => 'Evidencia'),
             ]);
     }
 
@@ -75,7 +159,7 @@ class ErReportResource extends Resource
             ->recordUrl(function (Model $record): string {
                 return ErReportResource::getUrl('view', ['record' => $record]);
             })
-            
+
 
             ->recordTitleAttribute('status')
             ->columns([
@@ -90,14 +174,14 @@ class ErReportResource extends Resource
                 TextColumn::make('type.severity')
                     ->label('Gravedad')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
                         'leve' => '🟢 Leve',
                         'moderado' => '🟡 Moderado',
                         'grave' => '🔴 Grave',
                         'critico' => '💥 Crítico',
                         default => $state,
                     })
-                    ->color(fn ($state) => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'leve' => 'success',     // verde
                         'moderado' => 'warning', // amarillo
                         'grave' => 'danger',     // rojo
@@ -114,13 +198,13 @@ class ErReportResource extends Resource
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
                         'abierto' => 'Abierto',
                         'en_proceso' => 'En proceso',
                         'cerrado' => 'Cerrado',
                         default => $state,
                     })
-                    ->color(fn ($state) => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'abierto' => 'danger',     // rojo
                         'en_proceso' => 'warning', // amarillo
                         'cerrado' => 'success',     // verde
@@ -136,17 +220,17 @@ class ErReportResource extends Resource
                 TextColumn::make('discount_amount')
                     ->label('Monto')
                     ->money('COP')
-                    ->color(fn ($state) => $state > 0 ? 'danger' : null)
+                    ->color(fn($state) => $state > 0 ? 'danger' : null)
                     ->toggleable(isToggledHiddenByDefault: false),
 
                 TextColumn::make('type.has_commission_penalty')
                     ->label('Penalización')
                     ->formatStateUsing(function ($state, $record) {
                         return $state
-                            ? number_format($record->type->commission_penalty_percentage, 2).'%'
+                            ? number_format($record->type->commission_penalty_percentage, 2) . '%'
                             : 'N/A';
                     })
-                    ->color(fn ($state) => $state ? 'danger' : 'gray')
+                    ->color(fn($state) => $state ? 'danger' : 'gray')
                     ->toggleable(isToggledHiddenByDefault: false)
                     ->alignCenter(),
 
@@ -158,7 +242,7 @@ class ErReportResource extends Resource
                     ->counts('attachments')
                     ->label('Evidencias')
                     ->badge()
-                    ->color(fn ($state): string => $state > 0 ? 'info' : 'gray')
+                    ->color(fn($state): string => $state > 0 ? 'info' : 'gray')
                     ->alignCenter()
                     ->toggleable(isToggledHiddenByDefault: false),
 
