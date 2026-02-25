@@ -17,12 +17,16 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use App\Filament\Resources\ER\ErReports\Pages\ViewErReport;
+
+
 
 class ErReportResource extends Resource
 {
     protected static ?string $model = ErReport::class;
 
-    protected static ?string $recordTitleAttribute = 'status';
+    protected static ?string $recordTitleAttribute = 'id';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Gestión Disciplinaria';
 
@@ -68,6 +72,11 @@ class ErReportResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(function (Model $record): string {
+                return ErReportResource::getUrl('view', ['record' => $record]);
+            })
+            
+
             ->recordTitleAttribute('status')
             ->columns([
                 TextColumn::make('employee.full_name')
@@ -183,6 +192,8 @@ class ErReportResource extends Resource
     {
         return [
             'index' => ManageErReports::route('/'),
+            'view'  => ViewErReport::route('/{record}'),
+
         ];
     }
 }
