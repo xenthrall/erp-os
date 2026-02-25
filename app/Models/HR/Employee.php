@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 
+//importar report
+use App\Models\ER\ErReport;
+
 class Employee extends Model
 {
     protected $fillable = [
@@ -26,4 +29,10 @@ class Employee extends Model
     {
         return $this->belongsTo(Department::class);
     }
+
+    public function errorReports()
+    {
+        return $this->hasMany(ErReport::class);
+    }
+
 }

@@ -12,6 +12,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -116,7 +117,29 @@ class EmployeeResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->disabled(function(Employee $record) {
+                        return $record->errorReports()->exists();
+                    })
+                    ->tooltip(function(Employee $record) {
+                        if ($record->errorReports()->exists()) {
+                            return 'No se puede eliminar este empleado porque tiene reportes de errores asociados.';
+                        }
+                        return null;
+                    })
+                    ->before(function (DeleteAction $action, Employee $record) {
+                        $hasErrorReports = $record->errorReports()->exists();
+                        if ($hasErrorReports) {
+                            Notification::make()
+                                ->title('No se puede eliminar el empleado')
+                                ->body('Este empleado tiene reportes de errores asociados y no puede ser eliminado.')
+                                ->danger()
+                                ->duration(5000)
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
