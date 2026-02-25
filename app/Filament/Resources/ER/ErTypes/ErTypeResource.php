@@ -22,6 +22,8 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
+
 
 class ErTypeResource extends Resource
 {
@@ -148,7 +150,28 @@ class ErTypeResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->disabled(function(ErType $record) {
+                            return $record->errorReports()->exists();
+                        })
+                        ->tooltip(function(ErType $record) {
+                            if ($record->errorReports()->exists()) {
+                                return 'No se puede eliminar este tipo de ER porque tiene reportes de errores asociados.';
+                            }
+                            return null;
+                        })
+                        ->before(function (DeleteAction $action, ErType $record) {
+                            $hasErrorReports = $record->errorReports()->exists();
+                            if ($hasErrorReports) {
+                                Notification::make()
+                                    ->title('No se puede eliminar el tipo de ER')
+                                    ->body('Este tipo de ER tiene reportes de errores asociados y no puede ser eliminado.')
+                                    ->danger()
+                                    ->duration(5000)
+                                    ->send();
+                            }
+                            $action->cancel();
+                        }),
                 ]),
             ])
             ->toolbarActions([

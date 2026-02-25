@@ -23,8 +23,8 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
 
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Section;
 use Filament\Schemas\Components\Grid;
+use Filament\Notifications\Notification;
 
 
 class ErReportResource extends Resource
@@ -264,7 +264,30 @@ class ErReportResource extends Resource
                 ActionGroup::make([
                     EditAction::make(),
                     UploadEvidenceAction::make(),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->disabled(function(ErReport $record) {
+                            return $record->attachments()->exists();
+                        })
+                        ->tooltip(function(ErReport $record) {
+                            if ($record->attachments()->exists()) {
+                                return 'No se puede eliminar este reporte porque tiene evidencias asociadas.';
+                            }
+                            return null;
+                        })
+                        ->before(function (DeleteAction $action, ErReport $record) {
+                            $hasAttachments = $record->attachments()->exists();
+                            if ($hasAttachments) {
+                                Notification::make()
+                                    ->title('No se puede eliminar el reporte')
+                                    ->body('Este reporte tiene evidencias asociadas y no puede ser eliminado.')
+                                    ->danger()
+                                    ->duration(5000)
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
+
                 ]),
             ])
             ->toolbarActions([

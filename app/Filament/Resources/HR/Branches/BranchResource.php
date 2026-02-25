@@ -4,19 +4,18 @@ namespace App\Filament\Resources\HR\Branches;
 
 use App\Filament\Resources\HR\Branches\Pages\ManageBranches;
 use App\Models\HR\Branch;
-use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
+
 
 class BranchResource extends Resource
 {
@@ -90,7 +89,28 @@ class BranchResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->disabled(function(Branch $record) {
+                        return $record->departments()->exists();
+                    })
+                    ->tooltip(function(Branch $record) {
+                        if ($record->departments()->exists()) {
+                            return 'No se puede eliminar esta sede porque tiene areas asociados.';
+                        }
+                        return null;
+                    })
+                    ->before(function (DeleteAction $action, Branch $record) {
+                        $hasEmployees = $record->departments()->exists();
+                        if ($hasEmployees) {
+                            Notification::make()
+                                ->title('No se puede eliminar la sede')
+                                ->body('Esta sede tiene areas asociados y no puede ser eliminada.')
+                                ->danger()
+                                ->duration(5000)
+                                ->send();
+                        }
+                        $action->cancel();
+                    })
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

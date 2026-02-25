@@ -4,20 +4,19 @@ namespace App\Filament\Resources\HR\Departments;
 
 use App\Filament\Resources\HR\Departments\Pages\ManageDepartments;
 use App\Models\HR\Department;
-use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
+
 
 class DepartmentResource extends Resource
 {
@@ -87,7 +86,29 @@ class DepartmentResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->disabled(function(Department $record) {
+                        return $record->employees()->exists();
+                    })
+                    ->tooltip(function(Department $record) {
+                        if ($record->employees()->exists()) {
+                            return 'No se puede eliminar este area porque tiene empleados asociados.';
+                        }
+                        return null;
+                    })
+                    ->before(function (DeleteAction $action, Department $record) {
+                        $hasEmployees = $record->employees()->exists();
+                        if ($hasEmployees) {
+                            Notification::make()
+                                ->title('No se puede eliminar el area')
+                                ->body('Este area tiene empleados asociados y no puede ser eliminado.')
+                                ->danger()
+                                ->duration(5000)
+                                ->send();
+                        }
+                        $action->cancel();
+                    }),
+                    
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
