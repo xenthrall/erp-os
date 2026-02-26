@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+
 class User extends Authenticatable
 {
     use HasRoles;
@@ -23,6 +26,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // Polimórfica
+        'userable_id', 
+        'userable_type',
     ];
 
     /**
@@ -49,5 +55,13 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Relación Polimórfica: Obtiene el perfil del usuario (Employee o Customer)
+     */
+    public function userable(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

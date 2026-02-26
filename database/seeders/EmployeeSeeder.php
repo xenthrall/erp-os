@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use App\Models\HR\Employee;
 use App\Models\HR\Department;
 use App\Models\HR\Branch;
@@ -25,48 +26,55 @@ class EmployeeSeeder extends Seeder
 
             $branchName = trim($data['branch']);
             $departmentName = trim($data['department']);
-            $email = $data['email'] ?? null;
+            $email = isset($data['email']) ? trim($data['email']) : null;
 
-            // Buscar sucursal
+            // 1. Buscar la sucursal
             $branch = Branch::where('name', $branchName)->first();
 
             if (!$branch) {
-                $this->command?->warn("Sucursal no encontrada: {$branchName}");
+                $this->command?->error("Sucursal no encontrada: {$branchName}");
                 continue;
             }
 
-            // Buscar departamento dentro de la sucursal correcta
+            // 2. Buscar el departamento dentro de esa sucursal
             $department = Department::where('name', $departmentName)
                 ->where('branch_id', $branch->id)
                 ->first();
 
             if (!$department) {
-                $this->command?->warn("Departamento no encontrado: {$departmentName} en {$branchName}");
+                $this->command?->error("Departamento no encontrado: {$departmentName} en {$branchName}");
                 continue;
             }
 
-            // Buscar usuario por email (si existe)
-            $userId = null;
-
-            if (!empty($email)) {
-                $user = User::where('email', trim($email))->first();
-                $userId = $user?->id;
-            }
-
-            Employee::updateOrCreate(
+            // 3. Crear o actualizar el empleado (Módulo HR)
+            $employee = Employee::updateOrCreate(
                 [
                     'document_number' => trim($data['document_number']),
                 ],
                 [
-                    'user_id' => $userId,
                     'department_id' => $department->id,
-                    'full_name' => trim($data['full_name']),
-                    'position' => trim($data['position']),
-                    'is_active' => true,
+                    'first_name'    => trim($data['first_name']),
+                    'last_name'     => trim($data['last_name']),
+                    'position'      => trim($data['position']),
+                    'document_type' => 'CC', 
+                    'is_active'     => true,
                 ]
             );
+
+            // 4. Sincronizar con la tabla Users (Polimorfismo)
+            if ($email) {
+                $employee->user()->updateOrCreate(
+                    [
+                        'email' => $email
+                    ],
+                    [
+                        'name'     => trim($data['first_name']) . ' ' . trim($data['last_name']),
+                        'password' => trim($data['document_number']),
+                    ]
+                );
+            }
         }
 
-        $this->command?->info('Empleados cargados correctamente.');
+        $this->command?->info('Sincronización de empleados y usuarios completada.');
     }
 }
