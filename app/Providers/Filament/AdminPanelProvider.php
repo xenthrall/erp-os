@@ -66,6 +66,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Gestión de Garantías')
+                    ->icon('heroicon-o-shield-check') // Otro icono sería 'heroicon-o-wrench-screwdriver'
+                    ->collapsed(),
+
+                NavigationGroup::make()
                     ->label('Gestión Disciplinaria')
                     ->icon('heroicon-o-clipboard-document-check')
                     ->collapsed(),
@@ -76,7 +81,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('sistema')
                     ->collapsed(),
-                
+
 
             ])
             ->middleware([
