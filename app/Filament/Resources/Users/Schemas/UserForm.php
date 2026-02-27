@@ -16,18 +16,22 @@ class UserForm
             ->components([
                 TextInput::make('name')
                     ->label('Nombre')
+                    ->placeholder('John Doe')
                     ->required(),
                 TextInput::make('email')
                     ->label('Correo Electrónico')
+                    ->unique(ignoreRecord: true)
+                    ->placeholder('nombre@ejemplo.com')
                     ->email()
                     ->required(),
-                DateTimePicker::make('email_verified_at')
-                    ->label('Verificado el'),
                 TextInput::make('password')
                     ->label('Contraseña')
                     ->revealable()
                     ->password()
-                    ->required(),
+                    ->required(fn(string $operation): bool => $operation === 'create')
+                    ->disabled(fn(string $operation): bool => $operation === 'edit')
+                    ->dehydrated(fn(?string $state): bool => filled($state)),
+
                 Select::make('roles')
                     ->label('Rol')
                     //->visible(fn() => auth()->user()?->can('user.manage_roles'))
