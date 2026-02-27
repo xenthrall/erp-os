@@ -13,6 +13,7 @@ class WarrantyRequest extends Model
         'customer_id',
         'user_id',
         'factory_id',
+        'factory_sequence',
         'shipping_city',
         'shipping_address',
         'damage_date',

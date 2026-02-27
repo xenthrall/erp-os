@@ -25,6 +25,10 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('warranty_factories');
 
+            $table->unsignedInteger('factory_sequence')
+                ->nullable()
+                ->comment('Secuencia única por fábrica para carpetas/evidencias (ej. 0001)');
+
             $table->string('shipping_city')->nullable();
             $table->string('shipping_address')->nullable();
             $table->date('damage_date')->nullable();
@@ -37,6 +41,10 @@ return new class extends Migration
             $table->text('failure_description');
 
             $table->timestamps();
+
+            // --- RESTRICCIÓN ÚNICA COMPUESTA ---
+            // Garantiza que no existan dos solicitudes con el mismo ID de fábrica y el mismo número de secuencia
+            $table->unique(['factory_id', 'factory_sequence'], 'unique_factory_sequence');
         });
     }
 

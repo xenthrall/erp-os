@@ -31,4 +31,9 @@ class Customer extends Model
     {
         return $this->hasMany(WarrantyRequest::class);
     }
+
+    public function warrantyBatches(): HasMany
+    {
+        return $this->hasMany(WarrantyBatch::class);
+    }
 }
