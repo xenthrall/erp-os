@@ -15,6 +15,6 @@ class WarrantyFactory extends Model
 
     public function warrantiesRequests(): HasMany
     {
-        return $this->hasMany(WarrantyRequest::class, 'warranty_factory_id');
+        return $this->hasMany(WarrantyRequest::class, 'factory_id');
     }
 }
