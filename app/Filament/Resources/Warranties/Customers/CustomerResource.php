@@ -24,6 +24,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class CustomerResource extends Resource
 {
@@ -146,6 +147,9 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(function (Model $record): string {
+                return CustomerResource::getUrl('warranties', ['record' => $record]);
+            })
             ->recordTitleAttribute('document_number')
             ->columns([
                 TextColumn::make('first_name')
@@ -208,6 +212,7 @@ class CustomerResource extends Resource
     {
         return [
             'index' => ManageCustomers::route('/'),
+            'warranties' => Pages\ManageCustomerWarranties::route('/{record}/warranties'),
         ];
     }
 }
