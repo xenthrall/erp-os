@@ -3,9 +3,12 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import '../css/app.css';
-import { initializeTheme } from './composables/useAppearance';
+import { initializeTheme } from './composables/useTheme';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// This will set light / dark mode on page load...
+initializeTheme();
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -24,5 +27,4 @@ createInertiaApp({
     },
 });
 
-// This will set light / dark mode on page load...
-initializeTheme();
+

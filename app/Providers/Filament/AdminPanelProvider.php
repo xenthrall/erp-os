@@ -30,8 +30,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('erp')
+            ->path('erp')
             ->login()
             ->profile(isSimple: false)
             ->viteTheme('resources/css/filament/admin/theme.css')
