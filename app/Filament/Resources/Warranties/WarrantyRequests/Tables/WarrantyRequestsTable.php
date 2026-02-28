@@ -8,7 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction; // Recomendado para ver detalles sin editar
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-
+use App\Enums\Warranties\WarrantyRequestStatus;
 class WarrantyRequestsTable
 {
     public static function configure(Table $table): Table
@@ -33,21 +33,15 @@ class WarrantyRequestsTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending'    => 'warning',
-                        'approved'   => 'success',
-                        'in_process' => 'info',
-                        'rejected'   => 'danger',
-                        'completed'  => 'success',
-                        default      => 'gray',
+                    ->color(fn (WarrantyRequestStatus $state): string => match ($state) {
+                        WarrantyRequestStatus::Pending    => 'warning',
+                        WarrantyRequestStatus::Approved   => 'success',
+                        WarrantyRequestStatus::Rejected   => 'danger',
                     })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending'    => 'Pendiente',
-                        'approved'   => 'Aprobada',
-                        'in_process' => 'En Proceso',
-                        'rejected'   => 'Rechazada',
-                        'completed'  => 'Completada',
-                        default      => ucfirst($state),
+                    ->formatStateUsing(fn (WarrantyRequestStatus $state): string => match ($state) {
+                        WarrantyRequestStatus::Pending    => 'Pendiente',
+                        WarrantyRequestStatus::Approved   => 'Aprobada',
+                        WarrantyRequestStatus::Rejected   => 'Rechazada',
                     }),
 
                 TextColumn::make('quantity')

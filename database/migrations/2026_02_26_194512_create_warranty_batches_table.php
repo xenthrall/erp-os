@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('customer_id')
                 ->constrained('customers');
 
-            $table->string('status')->default('open');
+            $table->string('status')->default('draft'); // draft, processing, shipped
             $table->string('out_sequence')->nullable();
             $table->string('servientrega_guide')->nullable();
             $table->timestamp('sent_at')->nullable();

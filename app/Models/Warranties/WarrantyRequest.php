@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use App\Enums\Warranties\WarrantyRequestStatus;
+
 class WarrantyRequest extends Model
 {
     protected $fillable = [
@@ -24,6 +26,12 @@ class WarrantyRequest extends Model
         'quantity',
         'status',
         'failure_description',
+    ];
+
+    protected $casts = [
+        'status' => WarrantyRequestStatus::class,
+        'damage_date' => 'date',
+        'purchase_date' => 'date',
     ];
 
     public function customer(): BelongsTo // customer_id

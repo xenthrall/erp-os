@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('internal_code')->nullable();
             $table->string('model')->nullable();
             $table->integer('quantity')->default(1);
-            $table->string('status')->default('pending');
+            $table->string('status')->default('pending'); // pending, approved, rejected
             $table->text('failure_description');
 
             $table->timestamps();
