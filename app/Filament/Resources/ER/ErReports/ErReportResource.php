@@ -55,8 +55,12 @@ class ErReportResource extends Resource
                     ->required(),
                 Select::make('employee_id')
                     ->label('Empleado involucrado')
-                    ->relationship('employee', 'full_name')
-                    ->searchable()
+                    ->relationship('employee', 'first_name')
+                    ->getOptionLabelFromRecordUsing(
+                        fn($record) =>
+                        "{$record->first_name} {$record->last_name} - {$record->document_number}"
+                    )
+                    ->searchable(['first_name', 'last_name', 'document_number'])
                     ->preload()
                     ->required(),
                 DatePicker::make('event_date')
@@ -74,7 +78,7 @@ class ErReportResource extends Resource
                         'ticket'  => 'Ticket',
                         'order'   => 'Orden',
                     ])
-                    ->afterStateHydrated(function (CheckboxList $component, ?Model $record) {        
+                    ->afterStateHydrated(function (CheckboxList $component, ?Model $record) {
 
                         $selected = [];
                         $references = $record->references ?? []; // Obtenemos el JSON
@@ -133,6 +137,8 @@ class ErReportResource extends Resource
                     ->label('Evidencias')
                     ->relationship()
                     ->maxItems(3)
+                    ->default([])
+                    ->disabled(fn($record) => $record && $record->attachments()->count() >= 1)
                     ->schema([
                         FileUpload::make('path')
                             ->label('Archivo')
@@ -145,10 +151,12 @@ class ErReportResource extends Resource
                             ->maxFiles(1)
                             ->imagePreviewHeight('150px')
                             ->maxSize(10240)
-                            ->downloadable(),
+                            ->downloadable()
+                            ->required(),
                     ])
                     ->columnSpanFull()
                     ->collapsible()
+                    ->collapsed(fn($record) => $record && $record->attachments()->count() > 0)
                     ->itemLabel(fn() => 'Evidencia'),
             ]);
     }
@@ -165,7 +173,7 @@ class ErReportResource extends Resource
             ->columns([
                 TextColumn::make('employee.full_name')
                     ->label('Empleado')
-                    ->searchable(),
+                    ->searchable(['first_name', 'last_name']),
 
                 TextColumn::make('type.name')
                     ->label('Tipo de ER')
@@ -265,10 +273,10 @@ class ErReportResource extends Resource
                     EditAction::make(),
                     UploadEvidenceAction::make(),
                     DeleteAction::make()
-                        ->disabled(function(ErReport $record) {
+                        ->disabled(function (ErReport $record) {
                             return $record->attachments()->exists();
                         })
-                        ->tooltip(function(ErReport $record) {
+                        ->tooltip(function (ErReport $record) {
                             if ($record->attachments()->exists()) {
                                 return 'No se puede eliminar este reporte porque tiene evidencias asociadas.';
                             }

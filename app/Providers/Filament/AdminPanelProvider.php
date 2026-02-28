@@ -29,11 +29,11 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('erp')
+            ->path('erp')
             ->login()
             ->profile(isSimple: false)
+            ->passwordReset()
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->renderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
@@ -56,6 +56,9 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('favicon.svg'))
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+             ->resources([
+                //
+            ])
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
@@ -65,6 +68,11 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
             ])
             ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Gestión de Garantías')
+                    ->icon('heroicon-o-shield-check') // Otro icono sería 'heroicon-o-wrench-screwdriver'
+                    ->collapsed(),
+
                 NavigationGroup::make()
                     ->label('Gestión Disciplinaria')
                     ->icon('heroicon-o-clipboard-document-check')
@@ -76,7 +84,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('sistema')
                     ->collapsed(),
-                
+
 
             ])
             ->middleware([

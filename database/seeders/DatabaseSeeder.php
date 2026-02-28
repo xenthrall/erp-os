@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             DepartmentSeeder::class,
             EmployeeSeeder::class,
+            CustomerTestSeeder::class,
+            WarrantyFactorySeeder::class,
         ]);
     }
 }
