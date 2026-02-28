@@ -19,7 +19,7 @@ import {
     InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { Spinner } from '@/components/ui/spinner';
-import { useAppearance } from '@/composables/useAppearance';
+import { useTheme } from '@/composables/useTheme';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import type { TwoFactorConfigContent } from '@/types';
 import { confirm } from '@/routes/two-factor';
@@ -29,7 +29,7 @@ type Props = {
     twoFactorEnabled: boolean;
 };
 
-const { resolvedAppearance } = useAppearance();
+const { resolvedTheme } = useTheme();
 
 const props = defineProps<Props>();
 const isOpen = defineModel<boolean>('isOpen');
@@ -46,26 +46,26 @@ const pinInputContainerRef = useTemplateRef('pinInputContainerRef');
 const modalConfig = computed<TwoFactorConfigContent>(() => {
     if (props.twoFactorEnabled) {
         return {
-            title: 'Two-Factor Authentication Enabled',
+            title: 'Autenticación de dos factores habilitada',
             description:
-                'Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.',
-            buttonText: 'Close',
+                'La autenticación de dos factores ahora está habilitada. Escanea el código QR o ingresa la clave de configuración en tu aplicación de autenticación.',
+            buttonText: 'Cerrar',
         };
     }
 
     if (showVerificationStep.value) {
         return {
-            title: 'Verify Authentication Code',
-            description: 'Enter the 6-digit code from your authenticator app',
-            buttonText: 'Continue',
+            title: 'Verificar código de autenticación',
+            description: 'Ingresa el código de 6 dígitos de tu aplicación de autenticación',
+            buttonText: 'Continuar',
         };
     }
 
     return {
-        title: 'Enable Two-Factor Authentication',
+        title: 'Habilitar autenticación de dos factores',
         description:
-            'To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app',
-        buttonText: 'Continue',
+            'Para terminar de habilitar la autenticación de dos factores, escanea el código QR o ingresa la clave de configuración en tu aplicación de autenticación',
+        buttonText: 'Continuar',
     };
 });
 
@@ -174,7 +174,7 @@ watch(
                                         class="flex aspect-square size-full items-center justify-center"
                                         :style="{
                                             filter:
-                                                resolvedAppearance === 'dark'
+                                                resolvedTheme === 'dark'
                                                     ? 'invert(1) brightness(1.5)'
                                                     : undefined,
                                         }"
@@ -196,7 +196,7 @@ watch(
                                 class="absolute inset-0 top-1/2 h-px w-full bg-border"
                             />
                             <span class="relative bg-card px-2 py-1"
-                                >or, enter the code manually</span
+                                >o ingresa el código manualmente</span
                             >
                         </div>
 
@@ -281,14 +281,14 @@ watch(
                                     @click="showVerificationStep = false"
                                     :disabled="processing"
                                 >
-                                    Back
+                                    Atrás
                                 </Button>
                                 <Button
                                     type="submit"
                                     class="w-auto flex-1"
                                     :disabled="processing || code.length < 6"
                                 >
-                                    Confirm
+                                    Confirmar
                                 </Button>
                             </div>
                         </div>
