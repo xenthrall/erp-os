@@ -3,6 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,11 +14,12 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+use App\Models\HR\Employee;
+use App\Models\Warranties\Customer;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasRoles;
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
@@ -27,7 +32,7 @@ class User extends Authenticatable
         'email',
         'password',
         // Polimórfica
-        'userable_id', 
+        'userable_id',
         'userable_type',
     ];
 
@@ -63,5 +68,26 @@ class User extends Authenticatable
     public function userable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'erp') {
+            return $this->userable instanceof Employee;
+        }
+
+        return false;
+    }
+
+    /**
+     * Devuelve la URL del panel correspondiente según el tipo de usuario.
+     */
+    public function getDashboardUrl(): string
+    {
+        return match (true) {
+            $this->userable instanceof Employee => url('/erp'),
+            $this->userable instanceof Customer => url('/cliente/dashboard'),
+            default => route('error.cuenta'),
+        };
     }
 }
