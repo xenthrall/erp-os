@@ -2,26 +2,26 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\HR\Employee;
+use App\Models\Warranties\Customer;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\HR\Employee;
-use App\Models\Warranties\Customer;
 
 class RedirectBasedOnUserType
 {
     public function handle(Request $request, Closure $next)
     {
-        //Si no está autenticado, no hacemos nada
-        if (!Auth::check()) {
+        // Si no está autenticado, no hacemos nada
+        if (! Auth::check()) {
             return $next($request);
         }
 
         $user = Auth::user();
 
-        // Solo actuar en rutas cliente/* o erp/*
+        // Solo actuar en rutas customer/* o erp/*
         if (
-            !$request->is('cliente/*') && !$request->is('erp/*') && !$request->routeIs('error.cuenta')
+            ! $request->is('customer/*') && ! $request->is('erp/*') && ! $request->routeIs('error.cuenta')
         ) {
             return $next($request);
         }
@@ -30,10 +30,10 @@ class RedirectBasedOnUserType
         $isCustomer = $user->userable instanceof Customer;
 
         // 1. Usuario huérfano (sin perfil válido)
-        if (!$isEmployee && !$isCustomer) {
+        if (! $isEmployee && ! $isCustomer) {
 
             // Evitar loop con logout o la propia ruta de error
-            if (!$request->routeIs('error.cuenta') && !$request->routeIs('logout')) {
+            if (! $request->routeIs('error.cuenta') && ! $request->routeIs('logout')) {
                 return redirect()->route('error.cuenta');
             }
 
@@ -46,8 +46,8 @@ class RedirectBasedOnUserType
         }
 
         /*
-        # 3. Employee intentando entrar a cliente/*
-        if ($isEmployee && $request->is('cliente/*')) {
+        # 3. Employee intentando entrar a customer/*
+        if ($isEmployee && $request->is('customer/*')) {
 
 
             return redirect()->to($user->getDashboardUrl());

@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Envolvemos todo en un grupo principal con el prefijo 'cliente'
-Route::prefix('cliente')->group(function () {
+Route::prefix('customer')->group(function () {
 
     Route::middleware(['auth'])->group(function () {
-        Route::redirect('settings', '/cliente/settings/profile');
+        Route::redirect('settings', '/customer/settings/profile');
 
         Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');

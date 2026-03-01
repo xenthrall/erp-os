@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
-import { dashboard, login, register } from '@/routes'
+import { login, register } from '@/routes'
+import customer from '@/routes/customer';
 
 withDefaults(
     defineProps<{
@@ -56,7 +57,7 @@ const year = new Date().getFullYear()
                         
                         <template v-if="$page.props.auth.user">
                             <Link
-                                :href="dashboard()"
+                                :href="customer.dashboard()"
                                 class="flex-1 text-center px-6 py-3 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 transition shadow-sm"
                             >
                                 Ingresar a mi cuenta

@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'home' => '/cliente/dashboard',
+    'home' => '/customer/dashboard',
 
     /*
     |--------------------------------------------------------------------------
@@ -86,7 +86,7 @@ return [
     |
     */
 
-    'prefix' => 'cliente',
+    'prefix' => 'customer',
 
     'domain' => null,
 
