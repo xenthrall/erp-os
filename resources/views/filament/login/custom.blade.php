@@ -1,211 +1,194 @@
 <style>
     /* ================================
-       1. Layout y Fondos (Overlay)
+       1. Layout y Fondo Principal
     ================================= */
-    
-    /* Ajuste del logo */
-    .fi-simple-header .fi-logo {
-        height: 3.5rem !important;
-        margin-bottom: 0.5rem;
-    }
 
-    /* Overlay general para dar profundidad */
+    /* MODO CLARO: Fondo completamente blanco */
+    body,
     .fi-simple-layout {
-        position: relative;
+        background-color: #ffffff !important;
+        transition: background-color 0.3s ease;
     }
 
-    /* Modo oscuro - Fondo */
-    .dark .fi-simple-layout::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.7); /* slate-900 con opacidad */
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        z-index: 0;
+    /* MODO OSCURO: Fondo oscuro (Zinc 950) */
+    .dark body,
+    .dark .fi-simple-layout {
+        background-color: #09090b !important;
     }
 
-    /* Modo claro - Fondo */
+    /* Ocultar cualquier pseudo-elemento de fondo */
     .fi-simple-layout::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: rgba(248, 250, 252, 0.6); /* slate-50 con opacidad */
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        z-index: 0;
-    }
-
-    /* Asegurar que el contenido del login esté encima del overlay */
-    .fi-simple-main {
-        position: relative;
-        z-index: 1;
-        animation: fadeInLogin 0.6s ease-out forwards;
+        display: none !important;
     }
 
     /* ================================
-       2. Card Login (Glass Corporativo)
+       2. Tarjeta Principal (Plana)
     ================================= */
 
-    /* Modo oscuro - Tarjeta */
-    .dark .fi-simple-main {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.9)) !important;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        /* Verde corporativo (green-600: rgb(22, 163, 74)) */
-        border: 1px solid rgba(22, 163, 74, 0.3) !important;
-        border-radius: 16px;
-        box-shadow:
-            0 0 30px rgba(22, 163, 74, 0.1),
-            0 20px 40px rgba(0, 0, 0, 0.5),
-            inset 0 0 10px rgba(22, 163, 74, 0.05) !important;
+    .fi-simple-main {
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        max-width: 28rem !important;
+        margin: 0 auto;
+        padding-top: 2rem !important;
     }
 
-    /* Modo claro - Tarjeta */
-    .fi-simple-main {
-        background-color: rgba(255, 255, 255, 0.85) !important;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(22, 163, 74, 0.15) !important;
-        border-radius: 16px;
-        box-shadow:
-            0 10px 30px rgba(0, 0, 0, 0.05),
-            0 0 20px rgba(22, 163, 74, 0.05) !important;
+    .fi-simple-header .fi-logo {
+        height: 3rem !important;
+        margin-bottom: 0.5rem;
     }
 
     /* ================================
        3. Títulos y Textos
     ================================= */
 
+    /* Título principal */
     .fi-simple-header h1 {
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        font-weight: 700;
+        color: #000000 !important;
+        font-weight: 600 !important;
+        font-size: 1.5rem !important;
+        letter-spacing: normal !important;
+        text-transform: none !important;
     }
-
     .dark .fi-simple-header h1 {
         color: #ffffff !important;
     }
 
-    .fi-simple-header h1 {
-        color: #1e293b !important; /* slate-800 */
+    /* Subtítulo */
+    .fi-simple-header p {
+        color: #6b7280 !important; /* gray-500 */
+    }
+    .dark .fi-simple-header p {
+        color: #a1a1aa !important; /* zinc-400 */
+    }
+
+    /* Labels de los inputs */
+    .fi-fo-field-wrp-label span {
+        font-weight: 600 !important;
+        color: #111827 !important;
+    }
+    .dark .fi-fo-field-wrp-label span {
+        color: #e4e4e7 !important; /* zinc-200 */
     }
 
     /* ================================
-       4. Inputs y Botón Principal
+       4. Inputs (Cajas de texto)
     ================================= */
 
-    /* Inputs Modo Oscuro */
+    /* MODO CLARO: Fondo azul claro */
+    .fi-input-wrapper {
+        background-color: #eff6ff !important; /* blue-50 */
+        border: 1px solid transparent !important;
+        box-shadow: none !important;
+        border-radius: 0.5rem !important;
+        transition: border-color 0.2s;
+    }
+    .fi-input {
+        background-color: transparent !important;
+        color: #111827 !important;
+    }
+    .fi-input-wrapper:focus-within {
+        border-color: #cbd5e1 !important; /* slate-300 */
+    }
+
+    /* MODO OSCURO: Fondo oscuro sutil con borde */
+    .dark .fi-input-wrapper {
+        background-color: #18181b !important; /* zinc-900 */
+        border: 1px solid #27272a !important; /* zinc-800 */
+    }
     .dark .fi-input {
-        background-color: rgba(15, 23, 42, 0.5) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
         color: #ffffff !important;
-        transition: all 0.3s ease;
     }
-
-    .dark .fi-input:focus {
-        border-color: #16a34a !important; /* Verde corporativo */
-        box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
-    }
-
-    /* Inputs Modo Claro */
-    .fi-input:focus {
-        border-color: #16a34a !important;
-        box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.15) !important;
-    }
-
-    /* Botón Principal (Primary) */
-    .fi-btn-color-primary {
-        background-color: #16a34a !important; /* Forzar verde institucional */
-        transition: all 0.3s ease !important;
-        border-radius: 8px !important;
-        font-weight: 600;
-    }
-
-    .fi-btn-color-primary:hover {
-        background-color: #15803d !important; /* Un verde un poco más oscuro al pasar el mouse */
-        transform: translateY(-1px);
-    }
-
-    .dark .fi-btn-color-primary {
-        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25) !important;
-    }
-
-    .dark .fi-btn-color-primary:hover {
-        box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4) !important;
+    .dark .fi-input-wrapper:focus-within {
+        border-color: #52525b !important; /* zinc-600 */
     }
 
     /* ================================
-       5. Botón Volver (Back to Portal)
+       5. Botón Principal (Entrar)
     ================================= */
 
-    .btn-volver-inicio {
-        position: fixed;
-        top: 1.5rem;
-        left: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1.2rem;
-        border-radius: 999px;
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 600;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-        z-index: 50;
+    /* MODO CLARO: Botón negro texto blanco */
+    .fi-btn-color-primary {
+        background-color: #18181b !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0.5rem !important;
+        font-weight: 500 !important;
+        transition: background-color 0.2s;
+    }
+    .fi-btn-color-primary:hover {
+        background-color: #27272a !important;
     }
 
-    /* Dark Mode - Botón Volver */
-    .dark .btn-volver-inicio {
-        background: rgba(30, 41, 59, 0.7);
-        color: #cbd5e1;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+    /* MODO OSCURO: Botón blanco texto negro (estilo minimalista) */
+    .dark .fi-btn-color-primary {
+        background-color: #ffffff !important;
+        color: #18181b !important;
     }
-
-    /* Light Mode - Botón Volver */
-    .btn-volver-inicio {
-        background: rgba(255, 255, 255, 0.8);
-        color: #475569;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    .dark .fi-btn-color-primary:hover {
+        background-color: #e4e4e7 !important; /* zinc-200 */
     }
 
     .btn-volver-inicio:hover {
-        color: #16a34a; /* Hover en verde corporativo */
-        border-color: #16a34a;
-        transform: translateX(-4px);
+        color: #111827; /* gray-900 */
+    }
+
+    /* MODO OSCURO: Enlace volver al inicio */
+    .dark .btn-volver-inicio {
+        color: #a1a1aa; /* zinc-400 */
+    }
+    .dark .btn-volver-inicio:hover {
+        color: #ffffff;
     }
 
     .btn-volver-inicio svg {
-        width: 1.1rem;
-        height: 1.1rem;
-        transition: transform 0.3s ease;
-    }
-
-    .btn-volver-inicio:hover svg {
-        transform: translateX(-2px);
-    }
-
-    /* ================================
-       6. Animaciones
-    ================================= */
-    @keyframes fadeInLogin {
-        from {
-            opacity: 0;
-            transform: translateY(15px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        width: 1.25rem;
+        height: 1.25rem;
     }
 </style>
 
-<a href="/" class="btn-volver-inicio">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-    </svg>
-    Portal
-</a>
+<div class="contenedor-volver-inicio">
+    <a href="/" class="btn-volver-inicio">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver al inicio
+    </a>
+</div>
+
+<style>
+    /* ================================
+       Contenedor inferior
+    ================================= */
+    .contenedor-volver-inicio {
+        position: fixed; /* Lo desvincula del flujo normal y lo fija a la pantalla */
+        bottom: 5rem;  /* Separación desde el borde inferior de la pantalla */
+        left: 50%;       /* Lo empuja a la mitad de la pantalla */
+        transform: translateX(-50%); 
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        z-index: 50;    
+    }
+
+    .btn-volver-inicio {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7280; 
+        font-size: 0.875rem;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .btn-volver-inicio:hover {
+        color: #111827; 
+    }
+
+    .btn-volver-inicio svg {
+        width: 1rem;
+        height: 1rem;
+    }
+</style>
