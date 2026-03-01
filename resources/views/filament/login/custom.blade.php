@@ -51,16 +51,20 @@
         letter-spacing: normal !important;
         text-transform: none !important;
     }
+
     .dark .fi-simple-header h1 {
         color: #ffffff !important;
     }
 
     /* Subtítulo */
     .fi-simple-header p {
-        color: #6b7280 !important; /* gray-500 */
+        color: #6b7280 !important;
+        /* gray-500 */
     }
+
     .dark .fi-simple-header p {
-        color: #a1a1aa !important; /* zinc-400 */
+        color: #a1a1aa !important;
+        /* zinc-400 */
     }
 
     /* Labels de los inputs */
@@ -68,8 +72,10 @@
         font-weight: 600 !important;
         color: #111827 !important;
     }
+
     .dark .fi-fo-field-wrp-label span {
-        color: #e4e4e7 !important; /* zinc-200 */
+        color: #e4e4e7 !important;
+        /* zinc-200 */
     }
 
     /* ================================
@@ -78,30 +84,39 @@
 
     /* MODO CLARO: Fondo azul claro */
     .fi-input-wrapper {
-        background-color: #eff6ff !important; /* blue-50 */
+        background-color: #eff6ff !important;
+        /* blue-50 */
         border: 1px solid transparent !important;
         box-shadow: none !important;
         border-radius: 0.5rem !important;
         transition: border-color 0.2s;
     }
+
     .fi-input {
         background-color: transparent !important;
         color: #111827 !important;
     }
+
     .fi-input-wrapper:focus-within {
-        border-color: #cbd5e1 !important; /* slate-300 */
+        border-color: #cbd5e1 !important;
+        /* slate-300 */
     }
 
     /* MODO OSCURO: Fondo oscuro sutil con borde */
     .dark .fi-input-wrapper {
-        background-color: #18181b !important; /* zinc-900 */
-        border: 1px solid #27272a !important; /* zinc-800 */
+        background-color: #18181b !important;
+        /* zinc-900 */
+        border: 1px solid #27272a !important;
+        /* zinc-800 */
     }
+
     .dark .fi-input {
         color: #ffffff !important;
     }
+
     .dark .fi-input-wrapper:focus-within {
-        border-color: #52525b !important; /* zinc-600 */
+        border-color: #52525b !important;
+        /* zinc-600 */
     }
 
     /* ================================
@@ -118,6 +133,7 @@
         font-weight: 500 !important;
         transition: background-color 0.2s;
     }
+
     .fi-btn-color-primary:hover {
         background-color: #27272a !important;
     }
@@ -127,18 +143,23 @@
         background-color: #ffffff !important;
         color: #18181b !important;
     }
+
     .dark .fi-btn-color-primary:hover {
-        background-color: #e4e4e7 !important; /* zinc-200 */
+        background-color: #e4e4e7 !important;
+        /* zinc-200 */
     }
 
     .btn-volver-inicio:hover {
-        color: #111827; /* gray-900 */
+        color: #111827;
+        /* gray-900 */
     }
 
     /* MODO OSCURO: Enlace volver al inicio */
     .dark .btn-volver-inicio {
-        color: #a1a1aa; /* zinc-400 */
+        color: #a1a1aa;
+        /* zinc-400 */
     }
+
     .dark .btn-volver-inicio:hover {
         color: #ffffff;
     }
@@ -146,49 +167,5 @@
     .btn-volver-inicio svg {
         width: 1.25rem;
         height: 1.25rem;
-    }
-</style>
-
-<div class="contenedor-volver-inicio">
-    <a href="/" class="btn-volver-inicio">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Volver al inicio
-    </a>
-</div>
-
-<style>
-    /* ================================
-       Contenedor inferior
-    ================================= */
-    .contenedor-volver-inicio {
-        position: fixed; /* Lo desvincula del flujo normal y lo fija a la pantalla */
-        bottom: 5rem;  /* Separación desde el borde inferior de la pantalla */
-        left: 50%;       /* Lo empuja a la mitad de la pantalla */
-        transform: translateX(-50%); 
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        z-index: 50;    
-    }
-
-    .btn-volver-inicio {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6b7280; 
-        font-size: 0.875rem;
-        text-decoration: none;
-        transition: color 0.2s ease;
-    }
-
-    .btn-volver-inicio:hover {
-        color: #111827; 
-    }
-
-    .btn-volver-inicio svg {
-        width: 1rem;
-        height: 1rem;
     }
 </style>

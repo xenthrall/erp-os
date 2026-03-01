@@ -4,12 +4,21 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-// landing page pública
+// 1. Landing page pública (Exclusiva para Clientes)
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('welcome/Client', [
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
+
+
+// 2. Landing page corporativa (Exclusiva para Empleados/Equipo Interno)
+Route::get('/interno', function () {
+    return Inertia::render('welcome/Employee', [
+        'canRegister' => false,
+    ]);
+})->name('home.employee');
+
 
 // Agrupamos las rutas exclusivas del cliente
 Route::prefix('cliente')->group(function () {
