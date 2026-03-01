@@ -8,11 +8,14 @@ use App\Models\HR\Employee;
 use App\Models\HR\Department;
 use App\Models\HR\Branch;
 use App\Models\User;
+use Spatie\Permission\Models\Role; // Importar el modelo de Spatie
 
 class EmployeeSeeder extends Seeder
 {
     public function run(): void
     {
+        $role = Role::firstOrCreate(['name' => 'EMPLEADO']);
+
         $path = database_path('data/employees.php');
 
         if (!file_exists($path)) {
@@ -23,12 +26,10 @@ class EmployeeSeeder extends Seeder
         $employees = require $path;
 
         foreach ($employees as $data) {
-
             $branchName = trim($data['branch']);
             $departmentName = trim($data['department']);
             $email = isset($data['email']) ? trim($data['email']) : null;
 
-            // 1. Buscar la sucursal
             $branch = Branch::where('name', $branchName)->first();
 
             if (!$branch) {
@@ -36,7 +37,6 @@ class EmployeeSeeder extends Seeder
                 continue;
             }
 
-            // 2. Buscar el departamento dentro de esa sucursal
             $department = Department::where('name', $departmentName)
                 ->where('branch_id', $branch->id)
                 ->first();
@@ -46,7 +46,6 @@ class EmployeeSeeder extends Seeder
                 continue;
             }
 
-            // 3. Crear o actualizar el empleado (Módulo HR)
             $employee = Employee::updateOrCreate(
                 [
                     'document_number' => trim($data['document_number']),
@@ -61,20 +60,21 @@ class EmployeeSeeder extends Seeder
                 ]
             );
 
-            // 4. Sincronizar con la tabla Users (Polimorfismo)
             if ($email) {
-                $employee->user()->updateOrCreate(
+                $user = $employee->user()->updateOrCreate(
                     [
                         'email' => $email
                     ],
                     [
                         'name'     => trim($data['first_name']) . ' ' . trim($data['last_name']),
-                        'password' => trim($data['document_number']),
+                        'password' => Hash::make(trim($data['document_number'])), // Es buena práctica usar Hash
                     ]
                 );
+
+                $user->assignRole($role);
             }
         }
 
-        $this->command?->info('Sincronización de empleados y usuarios completada.');
+        $this->command?->info('Sincronización de empleados, usuarios y roles completada.');
     }
 }
