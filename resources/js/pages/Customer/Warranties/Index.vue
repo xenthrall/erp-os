@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Plus, Eye, FileText, Clock } from 'lucide-vue-next';
+import { Plus, Eye, FileText, Clock, Trash2 } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const props = defineProps<{
     warranties: {
@@ -16,6 +17,35 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inicio', href: '/customer/dashboard' },
     { title: 'Mis Garantías', href: '#' },
 ];
+
+// --- Estado del modal de confirmación ---
+const showDeleteModal = ref(false);
+const warrantyToDelete = ref<{ id: number; model: string } | null>(null);
+
+const deleteForm = useForm({});
+
+function confirmDelete(item: { id: number; model: string }) {
+    warrantyToDelete.value = item;
+    showDeleteModal.value = true;
+}
+
+function cancelDelete() {
+    showDeleteModal.value = false;
+    warrantyToDelete.value = null;
+}
+
+function executeDelete() {
+    if (!warrantyToDelete.value) return;
+    deleteForm.delete(`/customer/warranties/${warrantyToDelete.value.id}`, {
+        onSuccess: () => {
+            showDeleteModal.value = false;
+            warrantyToDelete.value = null;
+        },
+        onError: () => {
+            showDeleteModal.value = false;
+        },
+    });
+}
 
 const getStatusClasses = (status: string) => {
     const map: Record<string, string> = {
@@ -136,13 +166,38 @@ const formatDate = (date: string) => {
                                     </span>
                                 </td>
 
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <Link 
+                                            :href="'/customer/warranties/' + item.id" 
+                                            class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                                        >
+                                            <Eye class="w-4 h-4" />
+                                            Ver detalles
+                                        </Link>
+
+                                        <button
+                                            v-if="item.status === 'pending'"
+                                            @click="confirmDelete(item)"
+                                            class="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
+                                        >
+                                            <Trash2 class="w-4 h-4" />
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Fila vacía desktop -->
+                            <tr v-if="warranties.data.length === 0">
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <FileText class="w-10 h-10 mx-auto text-slate-300 dark:text-zinc-700 mb-3" />
+                                    <p class="text-slate-500 italic">No has radicado ninguna garantía todavía.</p>
                                     <Link 
-                                        :href="'/customer/warranties/' + item.id" 
-                                        class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                                        href="/customer/warranties/create"
+                                        class="text-blue-600 text-sm font-medium"
                                     >
-                                        <Eye class="w-4 h-4" />
-                                        Ver detalles
+                                        Radicar mi primera solicitud
                                     </Link>
                                 </td>
                             </tr>
@@ -194,12 +249,23 @@ const formatDate = (date: string) => {
                                 Cantidad: <strong>{{ item.quantity }}</strong>
                             </span>
 
-                            <Link 
-                                :href="'/customer/warranties/' + item.id"
-                                class="text-sm font-medium text-blue-600 dark:text-blue-400"
-                            >
-                                Ver detalles →
-                            </Link>
+                            <div class="flex items-center gap-3">
+                                <Link 
+                                    :href="'/customer/warranties/' + item.id"
+                                    class="text-sm font-medium text-blue-600 dark:text-blue-400"
+                                >
+                                    Ver detalles →
+                                </Link>
+
+                                <button
+                                    v-if="item.status === 'pending'"
+                                    @click="confirmDelete(item)"
+                                    class="inline-flex items-center gap-1 text-sm font-medium text-red-600 dark:text-red-400"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                    Eliminar
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -257,5 +323,88 @@ const formatDate = (date: string) => {
 
             </div>
         </div>
+
+        <!-- ===================== -->
+        <!-- MODAL DE CONFIRMACIÓN -->
+        <!-- ===================== -->
+        <Teleport to="body">
+            <Transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+            >
+                <div
+                    v-if="showDeleteModal"
+                    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                >
+                    <!-- Backdrop -->
+                    <div 
+                        class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        @click="cancelDelete"
+                    />
+
+                    <!-- Modal card -->
+                    <Transition
+                        enter-active-class="transition duration-200 ease-out"
+                        enter-from-class="opacity-0 scale-95"
+                        enter-to-class="opacity-100 scale-100"
+                        leave-active-class="transition duration-150 ease-in"
+                        leave-from-class="opacity-100 scale-100"
+                        leave-to-class="opacity-0 scale-95"
+                        appear
+                    >
+                        <div
+                            v-if="showDeleteModal"
+                            class="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-zinc-700"
+                        >
+                            <!-- Icono de advertencia -->
+                            <div class="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30">
+                                <Trash2 class="w-7 h-7 text-red-600 dark:text-red-400" />
+                            </div>
+
+                            <h3 class="text-lg font-bold text-center text-slate-900 dark:text-white mb-1">
+                                ¿Eliminar garantía?
+                            </h3>
+                            <p class="text-sm text-center text-slate-500 dark:text-slate-400 mb-6">
+                                Vas a eliminar la garantía 
+                                <span class="font-semibold text-slate-700 dark:text-slate-300">
+                                    #{{ warrantyToDelete?.id }} – {{ warrantyToDelete?.model }}
+                                </span>.
+                                Esta acción no se puede deshacer.
+                            </p>
+
+                            <div class="flex gap-3">
+                                <button
+                                    @click="cancelDelete"
+                                    class="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 
+                                           text-slate-700 dark:text-slate-300 font-medium text-sm
+                                           hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    @click="executeDelete"
+                                    :disabled="deleteForm.processing"
+                                    class="flex-1 px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 
+                                           text-white font-medium text-sm transition-colors
+                                           disabled:opacity-60 disabled:cursor-not-allowed
+                                           inline-flex items-center justify-center gap-2"
+                                >
+                                    <span v-if="deleteForm.processing">Eliminando…</span>
+                                    <span v-else class="inline-flex items-center gap-2">
+                                        <Trash2 class="w-4 h-4" />
+                                        Sí, eliminar
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </Transition>
+                </div>
+            </Transition>
+        </Teleport>
+
     </AppLayout>
 </template>

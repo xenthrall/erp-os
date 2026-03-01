@@ -88,6 +88,31 @@ class WarrantyController extends Controller
         }
     }
 
+    public function destroy(Request $request, WarrantyRequest $warranty)
+    {
+        $user = $request->user();
+
+        if (! $user->userable instanceof Customer) {
+            return back()->with('error', 'Acceso denegado.');
+        }
+
+        // Verificar que la garantía pertenezca al cliente autenticado
+        if ($warranty->customer_id !== $user->userable->id) {
+            abort(403, 'No tienes permiso para eliminar esta garantía.');
+        }
+
+        // Solo se pueden eliminar garantías pendientes
+        if ($warranty->status !== WarrantyRequestStatus::Pending) {
+            return back()->with('error', 'Solo puedes eliminar garantías en estado Pendiente.');
+        }
+
+        $warrantyId = $warranty->id;
+        $warranty->delete();
+
+        return redirect()->route('customer.warranties.index')
+            ->with('success', "Garantía #{$warrantyId} eliminada correctamente.");
+    }
+
     public function dashboard(Request $request)
     {
         $user = $request->user();
