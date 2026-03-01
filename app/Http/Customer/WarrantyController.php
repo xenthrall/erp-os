@@ -51,8 +51,16 @@ class WarrantyController extends Controller
         $validated = $request->validate([
             'shipping_city' => 'required|string|max:100',
             'shipping_address' => 'required|string|max:255',
-            'damage_date' => 'required|date|before_or_equal:today',
-            'purchase_date' => 'required|date|before_or_equal:today',
+            'damage_date' => [
+                'required',
+                'date',
+                'before_or_equal:'.now()->format('d-m-Y'),
+            ],
+            'purchase_date' => [
+                'required',
+                'date',
+                'before_or_equal:'.now()->format('d-m-Y'),
+            ],
             'invoice_number' => 'required|string|max:50',
             'internal_code' => 'nullable|string|max:50',
             'model' => 'required|string|max:100',
