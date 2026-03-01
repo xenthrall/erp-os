@@ -3,6 +3,7 @@ import AppContent from '@/components/AppContent.vue';
 import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
+import ToastNotifications from '@/components/ToastNotifications.vue';
 import type { BreadcrumbItem } from '@/types';
 
 type Props = {
@@ -22,4 +23,8 @@ withDefaults(defineProps<Props>(), {
             <slot />
         </AppContent>
     </AppShell>
+
+    <!-- Notificaciones globales (flash de Inertia) -->
+    <ToastNotifications />
 </template>
+
