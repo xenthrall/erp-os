@@ -88,6 +88,82 @@ class WarrantyController extends Controller
         }
     }
 
+    public function edit(Request $request, WarrantyRequest $warranty)
+    {
+        $user = $request->user();
+
+        if (! $user->userable instanceof Customer) {
+            return redirect()->route('customer.dashboard')->with('error', 'Acceso denegado.');
+        }
+
+        if ($warranty->customer_id !== $user->userable->id) {
+            abort(403, 'No tienes permiso para editar esta garantía.');
+        }
+
+        if ($warranty->status !== WarrantyRequestStatus::Pending) {
+            return redirect()->route('customer.warranties.show', $warranty)
+                ->with('error', 'Solo puedes editar garantías en estado Pendiente.');
+        }
+
+        return Inertia::render('Customer/Warranties/Edit', [
+            'warranty' => $warranty,
+        ]);
+    }
+
+    public function update(Request $request, WarrantyRequest $warranty)
+    {
+        $user = $request->user();
+
+        if (! $user->userable instanceof Customer) {
+            return back()->with('error', 'Acceso denegado.');
+        }
+
+        if ($warranty->customer_id !== $user->userable->id) {
+            abort(403, 'No tienes permiso para editar esta garantía.');
+        }
+
+        if ($warranty->status !== WarrantyRequestStatus::Pending) {
+            return back()->with('error', 'Solo puedes editar garantías en estado Pendiente.');
+        }
+
+        $validated = $request->validate([
+            'shipping_city'       => 'required|string|max:100',
+            'shipping_address'    => 'required|string|max:255',
+            'damage_date'         => ['required', 'date', 'before_or_equal:' . now()->format('d-m-Y')],
+            'purchase_date'       => ['required', 'date', 'before_or_equal:' . now()->format('d-m-Y')],
+            'invoice_number'      => 'required|string|max:50',
+            'internal_code'       => 'nullable|string|max:50',
+            'model'               => 'required|string|max:100',
+            'quantity'            => 'required|integer|min:1|max:1000',
+            'failure_description' => 'required|string|min:10',
+        ]);
+
+        $warranty->update($validated);
+
+        return redirect()->route('customer.warranties.show', $warranty)
+            ->with('success', "Garantía #{$warranty->id} actualizada correctamente.");
+    }
+
+    public function show(Request $request, WarrantyRequest $warranty)
+    {
+        $user = $request->user();
+
+        if (! $user->userable instanceof Customer) {
+            return redirect()->route('customer.dashboard')->with('error', 'Acceso denegado.');
+        }
+
+        // El cliente solo puede ver sus propias garantías
+        if ($warranty->customer_id !== $user->userable->id) {
+            abort(403, 'No tienes permiso para ver esta garantía.');
+        }
+
+        $warranty->load(['notes.user', 'attachments']);
+
+        return Inertia::render('Customer/Warranties/Show', [
+            'warranty' => $warranty,
+        ]);
+    }
+
     public function destroy(Request $request, WarrantyRequest $warranty)
     {
         $user = $request->user();

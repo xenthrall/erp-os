@@ -34,6 +34,8 @@ Route::middleware(['auth', 'verified'])
             Route::get('create', [WarrantyController::class, 'create'])->name('create');
             Route::post('/', [WarrantyController::class, 'store'])->name('store');
             Route::get('{warranty}', [WarrantyController::class, 'show'])->name('show');
+            Route::get('{warranty}/edit', [WarrantyController::class, 'edit'])->name('edit');
+            Route::put('{warranty}', [WarrantyController::class, 'update'])->name('update');
             Route::delete('{warranty}', [WarrantyController::class, 'destroy'])->name('destroy');
         });
     });

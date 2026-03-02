@@ -2,7 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Plus, Eye, FileText, Clock, Trash2 } from 'lucide-vue-next';
+import { Plus, Eye, FileText, Clock, Trash2, Pencil } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -176,6 +176,15 @@ const formatDate = (date: string) => {
                                             Ver detalles
                                         </Link>
 
+                                        <Link
+                                            v-if="item.status === 'pending'"
+                                            :href="'/customer/warranties/' + item.id + '/edit'"
+                                            class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+                                        >
+                                            <Pencil class="w-4 h-4" />
+                                            Editar
+                                        </Link>
+
                                         <button
                                             v-if="item.status === 'pending'"
                                             @click="confirmDelete(item)"
@@ -255,6 +264,15 @@ const formatDate = (date: string) => {
                                     class="text-sm font-medium text-blue-600 dark:text-blue-400"
                                 >
                                     Ver detalles →
+                                </Link>
+
+                                <Link
+                                    v-if="item.status === 'pending'"
+                                    :href="'/customer/warranties/' + item.id + '/edit'"
+                                    class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-slate-400"
+                                >
+                                    <Pencil class="w-4 h-4" />
+                                    Editar
                                 </Link>
 
                                 <button
