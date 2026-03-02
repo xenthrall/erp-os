@@ -66,18 +66,30 @@ class WarrantyController extends Controller
             'model' => 'required|string|max:100',
             'quantity' => 'required|integer|min:1|max:1000',
             'failure_description' => 'required|string|min:10',
+            'attachments' => 'nullable|array|max:5', // Máximo 5 archivos
+            'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240', // Max 10MB por archivo
         ]);
 
         try {
             // 3. Uso de transacciones para integridad
-            return DB::transaction(function () use ($validated, $user) {
+            return DB::transaction(function () use ($validated, $user, $request) {
 
                 $warranty = WarrantyRequest::create([
-                    ...$validated,
+                    ...collect($validated)->except('attachments')->toArray(),
                     'user_id' => $user->id,
                     'customer_id' => $user->userable->id,
                     'status' => WarrantyRequestStatus::Pending,
                 ]);
+
+                // Procesar adjuntos si existen
+                if ($request->hasFile('attachments')) {
+                    foreach ($request->file('attachments') as $file) {
+                        $path = $file->store('warranties/attachments', 'public');
+                        $warranty->attachments()->create([
+                            'path' => $path,
+                        ]);
+                    }
+                }
 
                 return redirect()->route('customer.warranties.index')
                     ->with('success', "Garantía #{$warranty->id} radicada correctamente.");
@@ -136,9 +148,27 @@ class WarrantyController extends Controller
             'model'               => 'required|string|max:100',
             'quantity'            => 'required|integer|min:1|max:1000',
             'failure_description' => 'required|string|min:10',
+            'attachments'         => 'nullable|array|max:5',
+            'attachments.*'       => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
-        $warranty->update($validated);
+        try {
+            DB::transaction(function () use ($validated, $request, $warranty) {
+                $warranty->update(collect($validated)->except('attachments')->toArray());
+
+                // Procesar nuevos adjuntos si se suben durante la edición
+                if ($request->hasFile('attachments')) {
+                    foreach ($request->file('attachments') as $file) {
+                        $path = $file->store('warranties/attachments', 'public');
+                        $warranty->attachments()->create([
+                            'path' => $path,
+                        ]);
+                    }
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', 'Ocurrió un error inesperado al actualizar la solicitud.');
+        }
 
         return redirect()->route('customer.warranties.show', $warranty)
             ->with('success', "Garantía #{$warranty->id} actualizada correctamente.");

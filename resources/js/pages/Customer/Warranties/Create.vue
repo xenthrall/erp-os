@@ -2,7 +2,7 @@
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { ArrowLeft, Save } from 'lucide-vue-next';
+import { ArrowLeft, Save, UploadCloud, X, File as FileIcon, Image as ImageIcon } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inicio', href: '/customer/dashboard' },
@@ -20,7 +20,35 @@ const form = useForm({
     shipping_city: '',
     shipping_address: '',
     failure_description: '',
+    attachments: [] as File[],
 });
+
+const handleFileUpload = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+        const newFiles = Array.from(target.files);
+        const total = form.attachments.length + newFiles.length;
+        if (total > 5) {
+            // Ideally use a toast here, but alert works for fallback
+            alert('Puedes subir un máximo de 5 archivos.');
+            return;
+        }
+        form.attachments = [...form.attachments, ...newFiles];
+        target.value = ''; // Reset input
+    }
+};
+
+const removeFile = (index: number) => {
+    form.attachments.splice(index, 1);
+};
+
+const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
 
 const submit = () => {
     form.post('/customer/warranties', {
@@ -103,7 +131,7 @@ const submit = () => {
                             <input v-model="form.model" type="text" required placeholder="Ej. Barra LED X123"
                                 class="w-full bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
                             <span v-if="form.errors.model" class="text-xs text-red-500 mt-1">{{ form.errors.model
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <!-- Fecha de compra -->
@@ -136,7 +164,7 @@ const submit = () => {
                             <input v-model="form.quantity" type="number" min="1" required
                                 class="w-full bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
                             <span v-if="form.errors.quantity" class="text-xs text-red-500 mt-1">{{ form.errors.quantity
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <!-- Código interno -->
@@ -175,6 +203,65 @@ const submit = () => {
                     </div>
                 </section>
 
+                <!-- Sección: Evidencias -->
+                <section aria-labelledby="eviden-title"
+                    class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 md:p-8 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 dark:border-zinc-800 pb-4 flex items-center justify-between">
+                        <h2 id="eviden-title"
+                            class="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                            <span
+                                class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">3</span>
+                            Evidencias Fotográficas
+                        </h2>
+                        <span class="text-xs text-slate-400">Opcional pero recomendado</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="relative group cursor-pointer">
+                            <input type="file" multiple accept="image/jpeg,image/png,application/pdf"
+                                @change="handleFileUpload"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                title="Seleccionar archivos" />
+                            <div
+                                class="border-2 border-dashed border-slate-300 dark:border-zinc-700 rounded-2xl p-8 text-center bg-slate-50 dark:bg-zinc-800/20 group-hover:bg-blue-50/50 dark:group-hover:bg-blue-900/10 group-hover:border-blue-400 dark:group-hover:border-blue-600 transition-all">
+                                <UploadCloud
+                                    class="w-10 h-10 mx-auto text-slate-400 group-hover:text-blue-500 transition-colors mb-3" />
+                                <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Haz clic o
+                                    arrastra tus archivos aquí</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Soporta JPG, PNG o PDF (Máx. 10MB
+                                    por archivo, hasta 5 archivos)</p>
+                            </div>
+                        </div>
+
+                        <span v-if="form.errors.attachments" class="text-xs text-red-500 block">{{
+                            form.errors.attachments }}</span>
+                        <!-- Mostrar listado de archivos seleccionados -->
+                        <div v-if="form.attachments.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                            <div v-for="(file, index) in form.attachments" :key="index"
+                                class="flex items-center gap-3 p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-sm relative pr-10">
+
+                                <div
+                                    class="w-10 h-10 flex-shrink-0 rounded-lg bg-slate-100 dark:bg-zinc-900 flex items-center justify-center text-slate-500">
+                                    <ImageIcon v-if="file.type.startsWith('image/')" class="w-5 h-5 text-blue-500" />
+                                    <FileIcon v-else class="w-5 h-5 text-red-400" />
+                                </div>
+
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{{
+                                        file.name }}</p>
+                                    <p class="text-xs text-slate-400">{{ formatFileSize(file.size) }}</p>
+                                </div>
+
+                                <button type="button" @click="removeFile(index)"
+                                    class="absolute right-3 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                                    aria-label="Eliminar archivo">
+                                    <X class="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Sección: Envío -->
                 <section aria-labelledby="envio-title"
                     class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 md:p-8 shadow-sm space-y-6">
@@ -182,7 +269,7 @@ const submit = () => {
                         <h2 id="envio-title"
                             class="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                             <span
-                                class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">3</span>
+                                class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">4</span>
                             Datos de Envío
                         </h2>
                     </div>

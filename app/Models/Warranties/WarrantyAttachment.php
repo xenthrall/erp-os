@@ -8,7 +8,7 @@ class WarrantyAttachment extends Model
 {
     protected $fillable = [
         'warranty_request_id',
-        'file_path',
+        'path',
     ];
 
     public function warrantyRequest()

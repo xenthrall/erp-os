@@ -28,7 +28,7 @@ interface WarrantyNote {
 
 interface WarrantyAttachment {
     id: number;
-    file_path: string;
+    path: string;
 }
 
 interface Warranty {
@@ -182,7 +182,7 @@ const statusConfig = getStatusConfig(props.warranty.status);
                             <div>
                                 <p class="text-xs text-slate-400 dark:text-slate-500 mb-1">Cantidad</p>
                                 <p class="text-sm font-medium text-slate-800 dark:text-slate-200">{{ warranty.quantity
-                                    }}</p>
+                                }}</p>
                             </div>
                             <div>
                                 <p class="text-xs text-slate-400 dark:text-slate-500 mb-1 flex items-center gap-1">
@@ -287,19 +287,32 @@ const statusConfig = getStatusConfig(props.warranty.status);
 
                     <!-- Sección: Archivos adjuntos (si existen) -->
                     <section v-if="warranty.attachments && warranty.attachments.length > 0"
-                        class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm p-5 md:p-6 space-y-3">
+                        class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm p-5 md:p-6 space-y-4">
                         <h2
                             class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             <Paperclip class="w-4 h-4" />
-                            Archivos Adjuntos
+                            Evidencias Adjuntas
                         </h2>
-                        <ul class="space-y-2">
-                            <li v-for="file in warranty.attachments" :key="file.id"
-                                class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-zinc-800/50 text-sm text-slate-700 dark:text-slate-300">
-                                <Paperclip class="w-4 h-4 text-slate-400 shrink-0" />
-                                <span class="truncate">{{ file.file_path.split('/').pop() }}</span>
-                            </li>
-                        </ul>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <a v-for="file in warranty.attachments" :key="file.id" :href="`/storage/${file.path}`"
+                                target="_blank"
+                                class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all group">
+                                <div
+                                    class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0 group-hover:bg-blue-500 transition-colors">
+                                    <Paperclip
+                                        class="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:text-white transition-colors" />
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p
+                                        class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                        {{ file.path.split('/').pop() }}
+                                    </p>
+                                    <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Click para
+                                        visualizar</p>
+                                </div>
+                            </a>
+                        </div>
                     </section>
 
                 </div>
