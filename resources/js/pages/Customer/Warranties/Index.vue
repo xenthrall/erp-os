@@ -2,7 +2,13 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Plus, Eye, FileText, Clock, Trash2, Pencil } from 'lucide-vue-next';
+import { Plus, Eye, FileText, Clock, Trash2, Pencil, MoreVertical } from 'lucide-vue-next';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -167,32 +173,40 @@ const formatDate = (date: string) => {
                                 </td>
 
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <Link 
-                                            :href="'/customer/warranties/' + item.id" 
-                                            class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                                        >
-                                            <Eye class="w-4 h-4" />
-                                            Ver detalles
-                                        </Link>
+                                    <div class="flex items-center justify-end">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger as-child>
+                                                <button class="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none" aria-label="Opciones">
+                                                    <MoreVertical class="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                                                </button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" class="w-48">
+                                                <DropdownMenuItem as-child>
+                                                    <Link :href="'/customer/warranties/' + item.id" class="cursor-pointer flex items-center gap-2 w-full">
+                                                        <Eye class="w-4 h-4 opacity-70" />
+                                                        <span>Ver detalles</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
 
-                                        <Link
-                                            v-if="item.status === 'pending'"
-                                            :href="'/customer/warranties/' + item.id + '/edit'"
-                                            class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
-                                        >
-                                            <Pencil class="w-4 h-4" />
-                                            Editar
-                                        </Link>
-
-                                        <button
-                                            v-if="item.status === 'pending'"
-                                            @click="confirmDelete(item)"
-                                            class="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
-                                        >
-                                            <Trash2 class="w-4 h-4" />
-                                            Eliminar
-                                        </button>
+                                                <DropdownMenuItem v-if="item.status === 'pending'" as-child>
+                                                    <Link :href="'/customer/warranties/' + item.id + '/edit'" class="cursor-pointer flex items-center gap-2 w-full">
+                                                        <Pencil class="w-4 h-4 opacity-70" />
+                                                        <span>Editar</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                                
+                                                <DropdownMenuItem 
+                                                    v-if="item.status === 'pending'" 
+                                                    @click="confirmDelete(item)"
+                                                    class="text-red-600 focus:text-red-600 dark:text-red-400 focus:dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/50 cursor-pointer"
+                                                >
+                                                    <div class="flex items-center gap-2 w-full">
+                                                        <Trash2 class="w-4 h-4 opacity-70" />
+                                                        <span>Eliminar</span>
+                                                    </div>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </td>
                             </tr>
@@ -258,31 +272,40 @@ const formatDate = (date: string) => {
                                 Cantidad: <strong>{{ item.quantity }}</strong>
                             </span>
 
-                            <div class="flex items-center gap-3">
-                                <Link 
-                                    :href="'/customer/warranties/' + item.id"
-                                    class="text-sm font-medium text-blue-600 dark:text-blue-400"
-                                >
-                                    Ver detalles →
-                                </Link>
+                            <div class="flex items-center">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger as-child>
+                                        <button class="p-2 -mr-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none" aria-label="Opciones">
+                                            <MoreVertical class="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" class="w-48">
+                                        <DropdownMenuItem as-child>
+                                            <Link :href="'/customer/warranties/' + item.id" class="cursor-pointer flex items-center gap-2 w-full">
+                                                <Eye class="w-4 h-4 opacity-70" />
+                                                <span>Ver detalles</span>
+                                            </Link>
+                                        </DropdownMenuItem>
 
-                                <Link
-                                    v-if="item.status === 'pending'"
-                                    :href="'/customer/warranties/' + item.id + '/edit'"
-                                    class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-slate-400"
-                                >
-                                    <Pencil class="w-4 h-4" />
-                                    Editar
-                                </Link>
-
-                                <button
-                                    v-if="item.status === 'pending'"
-                                    @click="confirmDelete(item)"
-                                    class="inline-flex items-center gap-1 text-sm font-medium text-red-600 dark:text-red-400"
-                                >
-                                    <Trash2 class="w-4 h-4" />
-                                    Eliminar
-                                </button>
+                                        <DropdownMenuItem v-if="item.status === 'pending'" as-child>
+                                            <Link :href="'/customer/warranties/' + item.id + '/edit'" class="cursor-pointer flex items-center gap-2 w-full">
+                                                <Pencil class="w-4 h-4 opacity-70" />
+                                                <span>Editar</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        
+                                        <DropdownMenuItem 
+                                            v-if="item.status === 'pending'" 
+                                            @click="confirmDelete(item)"
+                                            class="text-red-600 focus:text-red-600 dark:text-red-400 focus:dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/50 cursor-pointer"
+                                        >
+                                            <div class="flex items-center gap-2 w-full">
+                                                <Trash2 class="w-4 h-4 opacity-70" />
+                                                <span>Eliminar</span>
+                                            </div>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </div>
                     </div>

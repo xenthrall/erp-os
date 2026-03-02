@@ -196,69 +196,34 @@ class WarrantyController extends Controller
         if ($user->userable instanceof Customer) {
             $customerId = $user->userable->id;
 
-            // Estadísticas
+            // Optimización: Una sola consulta agrupada para las métricas
+            $counts = WarrantyRequest::where('customer_id', $customerId)
+                ->select('status', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
+
             $stats = [
-                'inProcess' => WarrantyRequest::where('customer_id', $customerId)
-                    ->whereIn('status', [
-                        WarrantyRequestStatus::Pending,
-                    ])->count(),
-
-                'approved' => WarrantyRequest::where('customer_id', $customerId)
-                    ->where('status', WarrantyRequestStatus::Approved)
-                    ->count(),
-
-                'total' => WarrantyRequest::where('customer_id', $customerId)
-                    ->count(),
+                'pending'   => $counts[WarrantyRequestStatus::Pending->value] ?? 0,
+                'inReview'  => $counts[WarrantyRequestStatus::InReview->value] ?? 0,
+                'approved'  => $counts[WarrantyRequestStatus::Approved->value] ?? 0,
+                'rejected'  => $counts[WarrantyRequestStatus::Rejected->value] ?? 0,
+                'total'     => array_sum($counts),
             ];
 
-            // Últimos 5 casos
+            // Últimos 5 casos con fecha legible para la vista
             $recentWarranties = WarrantyRequest::where('customer_id', $customerId)
                 ->latest()
                 ->take(5)
-                ->get([
-                    'id',
-                    'model',
-                    'invoice_number',
-                    'damage_date',
-                    'status',
-                ]);
+                ->get();
 
             return Inertia::render('Customer/Dashboard', [
                 'stats' => $stats,
+                // Mapeamos para enviar dates formateadas via carbon (diffForHumans u otras opciones para JS)
                 'recentWarranties' => $recentWarranties,
             ]);
         }
 
-        // retornar datos falsos
-        return Inertia::render('Customer/Dashboard', [
-            'stats' => [
-                'inProcess' => 2,
-                'approved' => 1,
-                'total' => 3,
-            ],
-            'recentWarranties' => [
-                [
-                    'id' => 1,
-                    'model' => 'Modelo 1',
-                    'invoice_number' => 'Factura 1',
-                    'damage_date' => '2022-01-01',
-                    'status' => 'Pendiente',
-                ],
-                [
-                    'id' => 2,
-                    'model' => 'Modelo 2',
-                    'invoice_number' => 'Factura 2',
-                    'damage_date' => '2022-01-01',
-                    'status' => 'Aprobada',
-                ],
-                [
-                    'id' => 3,
-                    'model' => 'Modelo 3',
-                    'invoice_number' => 'Factura 3',
-                    'damage_date' => '2022-01-01',
-                    'status' => 'Rechazada',
-                ],
-            ],
-        ]);
+        return redirect()->route('home')->with('error', 'Acceso denegado a esta área.');
     }
 }
