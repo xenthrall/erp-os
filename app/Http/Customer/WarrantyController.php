@@ -4,8 +4,10 @@ namespace App\Http\Customer; // Corregí el namespace a Controllers
 
 use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Customer\Warranties\StoreWarrantyRequest;
+use App\Http\Requests\Customer\Warranties\UpdateWarrantyRequest;
 use App\Models\Warranties\Customer;
-use App\Models\Warranties\WarrantyRequest; // Importante para el estado inicial
+use App\Models\Warranties\WarrantyRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +41,7 @@ class WarrantyController extends Controller
         return Inertia::render('Customer/Warranties/Create');
     }
 
-    public function store(Request $request)
+    public function store(StoreWarrantyRequest $request)
     {
         // 1. Verificar identidad inmediatamente
         $user = $request->user();
@@ -47,28 +49,7 @@ class WarrantyController extends Controller
             return back()->with('error', 'Tu cuenta no está vinculada a un perfil de cliente válido.');
         }
 
-        // 2. Validación
-        $validated = $request->validate([
-            'shipping_city' => 'required|string|max:100',
-            'shipping_address' => 'required|string|max:255',
-            'damage_date' => [
-                'required',
-                'date',
-                'before_or_equal:'.now()->format('d-m-Y'),
-            ],
-            'purchase_date' => [
-                'required',
-                'date',
-                'before_or_equal:'.now()->format('d-m-Y'),
-            ],
-            'invoice_number' => 'required|string|max:50',
-            'internal_code' => 'nullable|string|max:50',
-            'model' => 'required|string|max:100',
-            'quantity' => 'required|integer|min:1|max:1000',
-            'failure_description' => 'required|string|min:10',
-            'attachments' => 'nullable|array|max:5', // Máximo 5 archivos
-            'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240', // Max 10MB por archivo
-        ]);
+        $validated = $request->validated();
 
         try {
             // 3. Uso de transacciones para integridad
@@ -117,12 +98,14 @@ class WarrantyController extends Controller
                 ->with('error', 'Solo puedes editar garantías en estado Pendiente.');
         }
 
+        $warranty->load('attachments');
+
         return Inertia::render('Customer/Warranties/Edit', [
             'warranty' => $warranty,
         ]);
     }
 
-    public function update(Request $request, WarrantyRequest $warranty)
+    public function update(UpdateWarrantyRequest $request, WarrantyRequest $warranty)
     {
         $user = $request->user();
 
@@ -138,23 +121,23 @@ class WarrantyController extends Controller
             return back()->with('error', 'Solo puedes editar garantías en estado Pendiente.');
         }
 
-        $validated = $request->validate([
-            'shipping_city'       => 'required|string|max:100',
-            'shipping_address'    => 'required|string|max:255',
-            'damage_date'         => ['required', 'date', 'before_or_equal:' . now()->format('d-m-Y')],
-            'purchase_date'       => ['required', 'date', 'before_or_equal:' . now()->format('d-m-Y')],
-            'invoice_number'      => 'required|string|max:50',
-            'internal_code'       => 'nullable|string|max:50',
-            'model'               => 'required|string|max:100',
-            'quantity'            => 'required|integer|min:1|max:1000',
-            'failure_description' => 'required|string|min:10',
-            'attachments'         => 'nullable|array|max:5',
-            'attachments.*'       => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
-        ]);
+        $validated = $request->validated();
 
         try {
             DB::transaction(function () use ($validated, $request, $warranty) {
-                $warranty->update(collect($validated)->except('attachments')->toArray());
+                $warranty->update(collect($validated)->except(['attachments', 'attachments_to_delete'])->toArray());
+
+                $idsToDelete = collect($validated['attachments_to_delete'] ?? [])
+                    ->filter()
+                    ->map(static fn ($id): int => (int) $id);
+
+                if ($idsToDelete->isNotEmpty()) {
+                    $warranty->attachments()
+                        ->whereIn('id', $idsToDelete->all())
+                        ->get()
+                        ->each
+                        ->delete();
+                }
 
                 // Procesar nuevos adjuntos si se suben durante la edición
                 if ($request->hasFile('attachments')) {
@@ -234,11 +217,11 @@ class WarrantyController extends Controller
                 ->toArray();
 
             $stats = [
-                'pending'   => $counts[WarrantyRequestStatus::Pending->value] ?? 0,
-                'inReview'  => $counts[WarrantyRequestStatus::InReview->value] ?? 0,
-                'approved'  => $counts[WarrantyRequestStatus::Approved->value] ?? 0,
-                'rejected'  => $counts[WarrantyRequestStatus::Rejected->value] ?? 0,
-                'total'     => array_sum($counts),
+                'pending' => $counts[WarrantyRequestStatus::Pending->value] ?? 0,
+                'inReview' => $counts[WarrantyRequestStatus::InReview->value] ?? 0,
+                'approved' => $counts[WarrantyRequestStatus::Approved->value] ?? 0,
+                'rejected' => $counts[WarrantyRequestStatus::Rejected->value] ?? 0,
+                'total' => array_sum($counts),
             ];
 
             // Últimos 5 casos con fecha legible para la vista

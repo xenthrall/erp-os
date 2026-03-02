@@ -2,7 +2,9 @@
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { ArrowLeft, Save, UploadCloud, X, File as FileIcon, Image as ImageIcon } from 'lucide-vue-next';
+import FilePondUploader from '@/components/FilePondUploader.vue';
+import { ArrowLeft, Save } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inicio', href: '/customer/dashboard' },
@@ -23,32 +25,30 @@ const form = useForm({
     attachments: [] as File[],
 });
 
-const handleFileUpload = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files) {
-        const newFiles = Array.from(target.files);
-        const total = form.attachments.length + newFiles.length;
-        if (total > 5) {
-            // Ideally use a toast here, but alert works for fallback
-            alert('Puedes subir un máximo de 5 archivos.');
-            return;
-        }
-        form.attachments = [...form.attachments, ...newFiles];
-        target.value = ''; // Reset input
-    }
-};
+const MAX_TOTAL_BYTES = 50 * 1024 * 1024;
 
-const removeFile = (index: number) => {
-    form.attachments.splice(index, 1);
-};
+const attachmentErrors = computed(() =>
+    Object.entries(form.errors)
+        .filter(([key]) => key === 'attachments' || key.startsWith('attachments.'))
+        .map(([, value]) => value),
+);
 
-const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-};
+const totalAttachmentsSize = computed(() =>
+    form.attachments.reduce((sum, file) => sum + file.size, 0),
+);
+
+const isOverTotalSize = computed(
+    () => totalAttachmentsSize.value > MAX_TOTAL_BYTES,
+);
+
+const formatTotalSize = computed(() => {
+    const bytes = totalAttachmentsSize.value;
+    if (bytes === 0) return '0 MB';
+
+    const mb = bytes / (1024 * 1024);
+
+    return `${mb.toFixed(1)} MB`;
+});
 
 const submit = () => {
     form.post('/customer/warranties', {
@@ -217,47 +217,30 @@ const submit = () => {
                     </div>
 
                     <div class="space-y-4">
-                        <div class="relative group cursor-pointer">
-                            <input type="file" multiple accept="image/jpeg,image/png,application/pdf"
-                                @change="handleFileUpload"
-                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                title="Seleccionar archivos" />
-                            <div
-                                class="border-2 border-dashed border-slate-300 dark:border-zinc-700 rounded-2xl p-8 text-center bg-slate-50 dark:bg-zinc-800/20 group-hover:bg-blue-50/50 dark:group-hover:bg-blue-900/10 group-hover:border-blue-400 dark:group-hover:border-blue-600 transition-all">
-                                <UploadCloud
-                                    class="w-10 h-10 mx-auto text-slate-400 group-hover:text-blue-500 transition-colors mb-3" />
-                                <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Haz clic o
-                                    arrastra tus archivos aquí</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Soporta JPG, PNG o PDF (Máx. 10MB
-                                    por archivo, hasta 5 archivos)</p>
-                            </div>
+                        <FilePondUploader
+                            v-model="form.attachments"
+                            :max-files="5"
+                            :accepted-file-types="['image/*', 'video/*', 'application/pdf']"
+                            max-file-size="50MB"
+                            help-text="Máximo 5 evidencias por garantía. El peso combinado no debe superar 50MB."
+                        />
+
+                        <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                            <p>
+                                Tamaño total actual:
+                                <span class="font-semibold">{{ formatTotalSize }}</span>
+                                / 50MB
+                            </p>
                         </div>
 
-                        <span v-if="form.errors.attachments" class="text-xs text-red-500 block">{{
-                            form.errors.attachments }}</span>
-                        <!-- Mostrar listado de archivos seleccionados -->
-                        <div v-if="form.attachments.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                            <div v-for="(file, index) in form.attachments" :key="index"
-                                class="flex items-center gap-3 p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-sm relative pr-10">
+                        <div v-if="attachmentErrors.length || isOverTotalSize" class="space-y-1">
+                            <p v-for="(error, idx) in attachmentErrors" :key="idx" class="text-xs text-red-500">
+                                {{ error }}
+                            </p>
 
-                                <div
-                                    class="w-10 h-10 flex-shrink-0 rounded-lg bg-slate-100 dark:bg-zinc-900 flex items-center justify-center text-slate-500">
-                                    <ImageIcon v-if="file.type.startsWith('image/')" class="w-5 h-5 text-blue-500" />
-                                    <FileIcon v-else class="w-5 h-5 text-red-400" />
-                                </div>
-
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{{
-                                        file.name }}</p>
-                                    <p class="text-xs text-slate-400">{{ formatFileSize(file.size) }}</p>
-                                </div>
-
-                                <button type="button" @click="removeFile(index)"
-                                    class="absolute right-3 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-                                    aria-label="Eliminar archivo">
-                                    <X class="w-4 h-4" />
-                                </button>
-                            </div>
+                            <p v-if="isOverTotalSize" class="text-xs text-red-500">
+                                El peso total combinado de las evidencias no debe superar 50MB.
+                            </p>
                         </div>
                     </div>
                 </section>
@@ -302,7 +285,7 @@ const submit = () => {
                         Cancelar
                     </Link>
 
-                    <button type="submit" :disabled="form.processing"
+                    <button type="submit" :disabled="form.processing || isOverTotalSize"
                         class="inline-flex items-center gap-2 bg-blue-600 text-white font-medium px-8 py-3 rounded-xl hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                         <Save v-if="!form.processing" class="w-5 h-5" />
                         {{ form.processing ? 'Enviando...' : 'Radicar Solicitud' }}
@@ -319,7 +302,7 @@ const submit = () => {
                         Cancelar
                     </Link>
 
-                    <button type="button" @click="submit" :disabled="form.processing"
+                    <button type="button" @click="submit" :disabled="form.processing || isOverTotalSize"
                         class="w-1/2 flex justify-center items-center gap-2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-70 disabled:cursor-not-allowed transition">
                         <Save v-if="!form.processing" class="w-4 h-4" />
                         {{ form.processing ? 'Enviando...' : 'Enviar' }}
