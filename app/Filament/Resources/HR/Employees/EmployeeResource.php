@@ -22,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 use App\Models\HR\Branch;
+use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 
 class EmployeeResource extends Resource
@@ -126,7 +127,7 @@ class EmployeeResource extends Resource
                     ->label('Correo')
                     ->searchable()
                     ->default('Sin usuario de ingreso')
-                    ->color(fn($record) => $record->user? 'success' : 'danger')
+                    ->color(fn($record) => $record->user ? 'success' : 'danger')
                     ->tooltip(
                         fn($record) =>
                         $record->user
@@ -162,30 +163,59 @@ class EmployeeResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make()
-                    ->disabled(function (Employee $record) {
-                        return $record->errorReports()->exists();
-                    })
-                    ->tooltip(function (Employee $record) {
-                        if ($record->errorReports()->exists()) {
-                            return 'No se puede eliminar este empleado porque tiene reportes de errores asociados.';
-                        }
-                        return null;
-                    })
-                    ->before(function (DeleteAction $action, Employee $record) {
-                        $hasErrorReports = $record->errorReports()->exists();
-                        if ($hasErrorReports) {
-                            Notification::make()
-                                ->title('No se puede eliminar el empleado')
-                                ->body('Este empleado tiene reportes de errores asociados y no puede ser eliminado.')
-                                ->danger()
-                                ->duration(5000)
-                                ->send();
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->disabled(function (Employee $record) {
 
-                            $action->cancel();
-                        }
-                    }),
+                            $hasErrorReports = $record->errorReports()->exists();
+
+                            $user = $record->user;
+
+                            $userHasOperations = false;
+
+                            if ($user) {
+                                $userHasOperations =
+                                    $user->warrantyRequests()->exists() ||
+                                    $user->reportedErReports()->exists();
+                            }
+
+                            return $hasErrorReports || $userHasOperations;
+                        })
+                        ->tooltip(function (Employee $record) {
+
+                            if ($record->errorReports()->exists()) {
+                                return 'No se puede eliminar este empleado porque tiene reportes de errores asociados.';
+                            }
+
+                            $user = $record->user;
+
+                            if (
+                                $user &&
+                                (
+                                    $user->warrantyRequests()->exists() ||
+                                    $user->reportedErReports()->exists()
+                                )
+                            ) {
+                                return 'No se puede eliminar este empleado porque su usuario tiene operaciones registradas.';
+                            }
+
+                            return null;
+                        })
+                        ->before(function (DeleteAction $action, Employee $record) {
+                            $hasErrorReports = $record->errorReports()->exists();
+                            if ($hasErrorReports) {
+                                Notification::make()
+                                    ->title('No se puede eliminar el empleado')
+                                    ->body('Este empleado tiene reportes de errores asociados y no puede ser eliminado.')
+                                    ->danger()
+                                    ->duration(5000)
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([]),

@@ -2,12 +2,12 @@
 
 namespace App\Models\Warranties;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
-use App\Enums\Warranties\WarrantyRequestStatus;
 
 class WarrantyRequest extends Model
 {
@@ -33,6 +33,13 @@ class WarrantyRequest extends Model
         'damage_date' => 'date',
         'purchase_date' => 'date',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (WarrantyRequest $warrantyRequest): void {
+            $warrantyRequest->attachments()->get()->each->delete();
+        });
+    }
 
     public function customer(): BelongsTo // customer_id
     {
@@ -62,5 +69,20 @@ class WarrantyRequest extends Model
     public function batchItems(): HasMany
     {
         return $this->hasMany(WarrantyBatchItem::class);
+    }
+
+
+
+    //scope
+
+    public function scopeWithCustomerSequence(Builder $query): Builder
+    {
+        return $query->selectRaw("
+        warranty_requests.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY customer_id
+            ORDER BY created_at ASC, id ASC
+        ) as customer_sequence
+    ");
     }
 }
