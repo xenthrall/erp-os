@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Customer\WarrantyController;
+use App\Http\Controllers\Customer\WarrantyController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;

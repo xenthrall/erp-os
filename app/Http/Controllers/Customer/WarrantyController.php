@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Customer; // Corregí el namespace a Controllers
+namespace App\Http\Controllers\Customer;
 
 use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Http\Controllers\Controller;
@@ -23,9 +23,10 @@ class WarrantyController extends Controller
         }
         $user = $request->user();
 
-        $warranties = WarrantyRequest::where('customer_id', $user->userable->id)
+        $warranties = WarrantyRequest::withCustomerSequence()
+            ->where('customer_id', $user->userable->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(6);
 
         return Inertia::render('Customer/Warranties/Index', [
             'warranties' => $warranties,
@@ -75,7 +76,6 @@ class WarrantyController extends Controller
                 return redirect()->route('customer.warranties.index')
                     ->with('success', "Garantía #{$warranty->id} radicada correctamente.");
             });
-
         } catch (\Exception $e) {
             return back()->with('error', 'Ocurrió un error inesperado al procesar la solicitud.');
         }
@@ -129,7 +129,7 @@ class WarrantyController extends Controller
 
                 $idsToDelete = collect($validated['attachments_to_delete'] ?? [])
                     ->filter()
-                    ->map(static fn ($id): int => (int) $id);
+                    ->map(static fn($id): int => (int) $id);
 
                 if ($idsToDelete->isNotEmpty()) {
                     $warranty->attachments()
@@ -224,19 +224,18 @@ class WarrantyController extends Controller
                 'total' => array_sum($counts),
             ];
 
-            // Últimos 5 casos con fecha legible para la vista
-            $recentWarranties = WarrantyRequest::where('customer_id', $customerId)
-                ->latest()
-                ->take(5)
+            $recentWarranties = WarrantyRequest::withCustomerSequence()
+                ->where('customer_id', $customerId)
+                ->orderByDesc('created_at')
+                ->limit(5)
                 ->get();
+
 
             return Inertia::render('Customer/Dashboard', [
                 'stats' => $stats,
-                // Mapeamos para enviar dates formateadas via carbon (diffForHumans u otras opciones para JS)
                 'recentWarranties' => $recentWarranties,
             ]);
-        }
-
+        } 
         return redirect()->route('home')->with('error', 'Acceso denegado a esta área.');
     }
 }

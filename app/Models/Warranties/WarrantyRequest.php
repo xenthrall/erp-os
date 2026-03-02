@@ -4,6 +4,7 @@ namespace App\Models\Warranties;
 
 use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -68,5 +69,20 @@ class WarrantyRequest extends Model
     public function batchItems(): HasMany
     {
         return $this->hasMany(WarrantyBatchItem::class);
+    }
+
+
+
+    //scope
+
+    public function scopeWithCustomerSequence(Builder $query): Builder
+    {
+        return $query->selectRaw("
+        warranty_requests.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY customer_id
+            ORDER BY created_at ASC, id ASC
+        ) as customer_sequence
+    ");
     }
 }

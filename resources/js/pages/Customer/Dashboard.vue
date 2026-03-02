@@ -42,6 +42,7 @@ const stats = page.props.stats as {
 
 const recentWarranties = page.props.recentWarranties as Array<{
     id: number;
+    customer_sequence: number;
     model: string;
     status: string;
     created_at: string;
@@ -239,9 +240,9 @@ const getStatusConfig = (status: string) => {
                                 <div
                                     class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex flex-col justify-center items-center shrink-0 border border-slate-200 dark:border-zinc-700 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                                     <span
-                                        class="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-none mb-0.5">ID</span>
+                                        class="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-none mb-0.5">#</span>
                                     <span class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-none">{{
-                                        warranty.id }}</span>
+                                        warranty.customer_sequence }}</span>
                                 </div>
 
                                 <div>

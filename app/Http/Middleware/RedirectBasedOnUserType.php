@@ -45,14 +45,12 @@ class RedirectBasedOnUserType
             return redirect()->to($user->getDashboardUrl());
         }
 
-        /*
+        
         # 3. Employee intentando entrar a customer/*
         if ($isEmployee && $request->is('customer/*')) {
 
-
             return redirect()->to($user->getDashboardUrl());
         }
-        */
 
         // 4. Customer intentando entrar a erp/*
         if ($isCustomer && $request->is('erp/*')) {

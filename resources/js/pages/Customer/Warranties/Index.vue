@@ -136,9 +136,9 @@ const formatDate = (date: string) => {
                             <div
                                 class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex flex-col justify-center items-center shrink-0 border border-slate-200 dark:border-zinc-700 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                                 <span
-                                    class="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-none mb-0.5">ID</span>
+                                    class="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-none mb-0.5">#</span>
                                 <span class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-none">{{
-                                    item.id }}</span>
+                                    item.customer_sequence }}</span>
                             </div>
                             <div>
                                 <span
@@ -187,7 +187,7 @@ const formatDate = (date: string) => {
                     </div>
 
                     <div class="mb-4">
-                        <h4 class="font-bold text-lg text-slate-900 dark:text-white line-clamp-1 mb-1">{{ item.model }}
+                        <h4 class="font-bold text-lg text-slate-900 dark:text-white line-clamp-1 mb-1">Modelo: {{ item.model }}
                         </h4>
                         <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-zinc-400">
                             <span class="flex items-center gap-1.5">

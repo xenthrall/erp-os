@@ -85,7 +85,7 @@ class User extends Authenticatable implements FilamentUser
     public function getDashboardUrl(): string
     {
         return match (true) {
-            $this->userable instanceof Employee => url('/erp'),
+            $this->userable instanceof Employee => url('/interno'),
             $this->userable instanceof Customer => url('/cliente/dashboard'),
             default => route('error.cuenta'),
         };
