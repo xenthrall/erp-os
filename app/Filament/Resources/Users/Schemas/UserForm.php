@@ -14,15 +14,18 @@ class UserForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label('Nombre')
-                    ->placeholder('John Doe')
-                    ->required(),
                 TextInput::make('email')
                     ->label('Correo Electrónico')
                     ->unique(ignoreRecord: true)
                     ->placeholder('nombre@ejemplo.com')
                     ->email()
+                    ->required(),
+                Select::make('roles')
+                    ->label('Rol')
+                    //->visible(fn() => auth()->user()?->can('user.manage_roles'))
+                    ->relationship('roles', 'name')
+                    ->preload()
+                    ->native(false)
                     ->required(),
                 TextInput::make('password')
                     ->label('Contraseña')
@@ -31,13 +34,6 @@ class UserForm
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->disabled(fn(string $operation): bool => $operation === 'edit')
                     ->dehydrated(fn(?string $state): bool => filled($state)),
-
-                Select::make('roles')
-                    ->label('Rol')
-                    //->visible(fn() => auth()->user()?->can('user.manage_roles'))
-                    ->relationship('roles', 'name')
-                    ->preload()
-                    ->required(),
             ]);
     }
 }

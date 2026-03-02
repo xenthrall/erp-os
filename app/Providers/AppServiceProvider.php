@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\HR\Employee;
+use App\Observers\HR\EmployeeObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        //HR
+        Employee::observe(EmployeeObserver::class);
     }
 
     /**

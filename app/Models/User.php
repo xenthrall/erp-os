@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\ER\ErReport;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 use App\Models\HR\Employee;
 use App\Models\Warranties\Customer;
+use App\Models\Warranties\WarrantyRequest;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -70,6 +72,18 @@ class User extends Authenticatable implements FilamentUser
         return $this->morphTo();
     }
 
+    public function warrantyRequests()
+    {
+        return $this->hasMany(WarrantyRequest::class, 'user_id');
+    }
+
+    public function reportedErReports()
+    {
+        return $this->hasMany(ErReport::class, 'reporter_id');
+    }
+
+
+    //Acceso a panel erp
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'erp') {
