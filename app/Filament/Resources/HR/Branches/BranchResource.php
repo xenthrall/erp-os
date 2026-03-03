@@ -90,10 +90,10 @@ class BranchResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->disabled(function(Branch $record) {
+                    ->disabled(function (Branch $record) {
                         return $record->departments()->exists();
                     })
-                    ->tooltip(function(Branch $record) {
+                    ->tooltip(function (Branch $record) {
                         if ($record->departments()->exists()) {
                             return 'No se puede eliminar esta sede porque tiene areas asociados.';
                         }
@@ -108,14 +108,12 @@ class BranchResource extends Resource
                                 ->danger()
                                 ->duration(5000)
                                 ->send();
+                            $action->cancel();
                         }
-                        $action->cancel();
                     })
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-
-                ]),
+                BulkActionGroup::make([]),
             ]);
     }
 

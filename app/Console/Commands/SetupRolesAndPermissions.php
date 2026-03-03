@@ -47,24 +47,33 @@ class SetupRolesAndPermissions extends Command
                 ['name' => 'users.update_credentials', 'action' => 'Cambiar correo o restablecer contraseña', 'roles' => ['SUPER ADMIN']],
             ],
 
-            'MÓDULO ER (ERRORES)' => [
-                ['name' => 'er.dashboard', 'action' => 'Dashboard principal', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
-                ['name' => 'er.mine', 'action' => 'MIS ER (mis errores)', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
-                ['name' => 'er.register_warranty', 'action' => 'Registrar solicitud de garantía', 'roles' => ['SUPER ADMIN', 'ADMIN', 'CLIENTE', 'CLI. DIST.']],
-                ['name' => 'er.upload_evidence', 'action' => 'Subir evidencias', 'roles' => ['SUPER ADMIN', 'ADMIN', 'CLIENTE', 'CLI. DIST.']],
-                ['name' => 'er.view_own_requests', 'action' => 'Ver sus propias solicitudes', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA', 'CLIENTE', 'CLI. DIST.']],
-                ['name' => 'er.view_status_notes', 'action' => 'Ver estado + notas del asesor', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA', 'CLIENTE', 'CLI. DIST.']],
-                ['name' => 'er.view_tracking', 'action' => 'Ver Nº guía Servientrega', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA', 'CLIENTE', 'CLI. DIST.']],
-                ['name' => 'er.view_pending', 'action' => 'Ver solicitudes pendientes', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR']],
-                ['name' => 'er.evaluate', 'action' => 'Evaluar solicitudes', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR']],
-                ['name' => 'er.assign_factory', 'action' => 'Asignar fábrica (YAN/LEOMA/CANDY)', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR']],
-                ['name' => 'er.group_requests', 'action' => 'Agrupar solicitudes', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR']],
-                ['name' => 'er.send_to_warehouse', 'action' => 'Enviar grupos a bodega', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR']],
-                ['name' => 'er.receive_dispatch', 'action' => 'Recibir grupos de despacho', 'roles' => ['SUPER ADMIN', 'ADMIN', 'BODEGA']],
-                ['name' => 'er.enter_tracking', 'action' => 'Ingresar guía Servientrega', 'roles' => ['SUPER ADMIN', 'ADMIN', 'BODEGA']],
-                ['name' => 'er.enter_out_consecutive', 'action' => 'Ingresar consecutivo OUT', 'roles' => ['SUPER ADMIN', 'ADMIN', 'BODEGA']],
-                ['name' => 'er.mark_dispatched', 'action' => 'Marcar como Despachada', 'roles' => ['SUPER ADMIN', 'ADMIN', 'BODEGA']],
+            'MÓDULO HR (Recursos Humanos)' => [
+                // =========================
+                // EMPLOYEES
+                // =========================
+                ['name' => 'hr.employees.view',   'action' => 'Ver listado de empleados',   'roles' => ['SUPER ADMIN', 'ADMIN', 'EMPLEADO']],
+                ['name' => 'hr.employees.create', 'action' => 'Crear empleados',    'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'hr.employees.edit',   'action' => 'Editar empleados',   'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'hr.employees.delete', 'action' => 'Eliminar empleados', 'roles' => ['SUPER ADMIN']],
+
+                // =========================
+                // SEDES
+                // =========================
+                ['name' => 'hr.branches.view',   'action' => 'Ver listado de sedes',   'roles' => ['SUPER ADMIN', 'ADMIN','EMPLEADO']],
+                ['name' => 'hr.branches.create', 'action' => 'Crear sedes',            'roles' => ['SUPER ADMIN']],
+                ['name' => 'hr.branches.edit',   'action' => 'Editar sedes',           'roles' => ['SUPER ADMIN']],
+                ['name' => 'hr.branches.delete', 'action' => 'Eliminar sedes',         'roles' => ['SUPER ADMIN']],
+
+
+                // =========================
+                // ÁREAS
+                // =========================
+                ['name' => 'hr.departments.view',   'action' => 'Ver listado de áreas',   'roles' => ['SUPER ADMIN', 'ADMIN', 'EMPLEADO']],
+                ['name' => 'hr.departments.create', 'action' => 'Crear áreas',            'roles' => ['SUPER ADMIN']],
+                ['name' => 'hr.departments.edit',   'action' => 'Editar áreas',           'roles' => ['SUPER ADMIN']],
+                ['name' => 'hr.departments.delete', 'action' => 'Eliminar áreas',         'roles' => ['SUPER ADMIN']],
             ],
+
             'DATOS INTERNOS' => [
                 ['name' => 'internal.view_factory_consecutive', 'action' => 'Ver consecutivo [FABRICA-N]', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
                 ['name' => 'internal.view_out_consecutive', 'action' => 'Ver consecutivo OUT', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
@@ -75,6 +84,7 @@ class SetupRolesAndPermissions extends Command
         $rolePermissions = [
             'SUPER ADMIN' => [],
             'ADMIN' => [],
+            'EMPLEADO' => [],
             'ASESOR' => [],
             'BODEGA' => [],
             'CLIENTE' => [],

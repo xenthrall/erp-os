@@ -105,8 +105,9 @@ class DepartmentResource extends Resource
                                 ->danger()
                                 ->duration(5000)
                                 ->send();
+                            $action->cancel();
                         }
-                        $action->cancel();
+                        
                     }),
                     
             ])
