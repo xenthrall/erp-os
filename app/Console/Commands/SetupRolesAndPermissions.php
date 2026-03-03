@@ -23,23 +23,30 @@ class SetupRolesAndPermissions extends Command
 
         // 2. Limpiar SOLAMENTE permisos y sus asignaciones (Protegiendo los Roles)
         $this->warn('⚠ Limpiando permisos antiguos (Los roles y usuarios se mantienen intactos)...');
-        
+
         DB::transaction(function () {
             DB::table('role_has_permissions')->delete();
             DB::table('model_has_permissions')->delete();
             Permission::query()->delete();
         });
-        
+
         $this->info('✔ Permisos eliminados correctamente.');
 
         // 3. Definir la matriz de permisos y a qué roles pertenecen
         $permissionsData = [
-            'ADMINISTRACIÓN' => [
-                // SOLO EL SUPER ADMIN PUEDE GESTIONAR ROLES Y PERMISOS
-                ['name' => 'admin.manage_roles', 'action' => 'Gestionar roles y permisos', 'roles' => ['SUPER ADMIN']],
-                ['name' => 'admin.manage_users', 'action' => 'Crear y editar usuarios', 'roles' => ['SUPER ADMIN', 'ADMIN']],
-                ['name' => 'admin.assign_roles', 'action' => 'Asignar roles a usuarios', 'roles' => ['SUPER ADMIN', 'ADMIN']],
+            'ROLES DEL SISTEMA' => [
+                ['name' => 'roles.view', 'action' => 'Ver listado de roles', 'roles' => ['SUPER ADMIN']],
+                ['name' => 'roles.create', 'action' => 'Crear roles', 'roles' => ['SUPER ADMIN']],
+                ['name' => 'roles.edit', 'action' => 'Editar nombre del rol', 'roles' => ['SUPER ADMIN']],
+                ['name' => 'roles.delete', 'action' => 'Eliminar roles', 'roles' => ['SUPER ADMIN']],
+                ['name' => 'roles.assign_permissions', 'action' => 'Asignar / quitar permisos a un rol', 'roles' => ['SUPER ADMIN']],
             ],
+            'USUARIOS DEL SISTEMA' => [
+                ['name' => 'users.view', 'action' => 'Ver listado de usuarios', 'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'users.manage_roles', 'action' => 'Asignar / cambiar rol del usuario', 'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'users.update_credentials', 'action' => 'Cambiar correo o restablecer contraseña', 'roles' => ['SUPER ADMIN']],
+            ],
+
             'MÓDULO ER (ERRORES)' => [
                 ['name' => 'er.dashboard', 'action' => 'Dashboard principal', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
                 ['name' => 'er.mine', 'action' => 'MIS ER (mis errores)', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
@@ -84,7 +91,7 @@ class SetupRolesAndPermissions extends Command
                     'guard_name' => 'web',
                     'group' => $group,
                     'action' => $perm['action'],
-                    'description' => 'Permite ' . strtolower($perm['action']), 
+                    'description' => 'Permite ' . strtolower($perm['action']),
                 ]);
 
                 foreach ($perm['roles'] as $roleName) {

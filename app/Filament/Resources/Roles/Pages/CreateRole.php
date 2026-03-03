@@ -26,7 +26,11 @@ class CreateRole extends CreateRecord
 
         // 2. lista estricta de permisos sensibles
         $sensitivePermissionNames = [
-            'admin.manage_roles',
+            'roles.view',
+            'roles.create',
+            'roles.edit',
+            'roles.delete',
+            'roles.assign_permissions'
         ];
 
         $sensitiveIds = Permission::whereIn('name', $sensitivePermissionNames)

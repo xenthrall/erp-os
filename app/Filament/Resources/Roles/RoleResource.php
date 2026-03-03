@@ -58,41 +58,4 @@ class RoleResource extends Resource
             'edit' => EditRole::route('/{record}/edit'),
         ];
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Control de Acceso con Spatie Permissions
-    |--------------------------------------------------------------------------
-    */
-    /*
-    public static function canViewAny(): bool
-    {
-        return Auth::user()?->can('role.view');
-    }
-
-    public static function canView($record): bool
-    {
-        return Auth::user()?->can('role.view');
-    }
-
-    public static function canCreate(): bool
-    {
-        return Auth::user()?->can('role.create');
-    }
-
-    public static function canEdit($record): bool
-    {
-        return Auth::user()?->can('role.edit');
-    }
-
-    public static function canDelete($record): bool
-    {
-        return Auth::user()?->can('role.delete');
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return Auth::user()?->can('role.delete');
-    }
-        */
 }

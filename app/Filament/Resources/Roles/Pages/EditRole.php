@@ -20,7 +20,7 @@ class EditRole extends EditRecord
     {
         $actions = [];
 
-        if (Auth::user()?->can('admin.manage_roles')) {
+        if (Auth::user()?->can('roles.delete')) {
             $actions[] = DeleteAction::make()
                 ->disabled(function (Role $record) {
                     return $record->users()->exists();
@@ -62,13 +62,20 @@ class EditRole extends EditRecord
 
         // 2. lista estricta de permisos sensibles
         $sensitivePermissionNames = [
-            'admin.manage_roles',
+            'roles.view',
+            'roles.create',
+            'roles.edit',
+            'roles.delete',
+            'roles.assign_permissions'
         ];
         //si el rol es SUper Admin definimos una lista de permisos sensibles más amplia
         if ($this->record->name === 'SUPER ADMIN') {
             $sensitivePermissionNames = [
-                'admin.manage_roles',
-                'admin.manage_users',
+                'roles.view',
+                'roles.create',
+                'roles.edit',
+                'roles.delete',
+                'roles.assign_permissions'
             ];
         }
 
@@ -98,7 +105,7 @@ class EditRole extends EditRecord
             $permissions = Permission::whereIn('id', $this->permissionsToSync)->get();
             $this->record->syncPermissions($permissions);
         } else {
-            $this->record->syncPermissions([]); 
+            $this->record->syncPermissions([]);
         }
     }
 
