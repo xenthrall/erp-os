@@ -59,7 +59,7 @@ class SetupRolesAndPermissions extends Command
                 // =========================
                 // SEDES
                 // =========================
-                ['name' => 'hr.branches.view',   'action' => 'Ver listado de sedes',   'roles' => ['SUPER ADMIN', 'ADMIN','EMPLEADO']],
+                ['name' => 'hr.branches.view',   'action' => 'Ver listado de sedes',   'roles' => ['SUPER ADMIN', 'ADMIN', 'EMPLEADO']],
                 ['name' => 'hr.branches.create', 'action' => 'Crear sedes',            'roles' => ['SUPER ADMIN']],
                 ['name' => 'hr.branches.edit',   'action' => 'Editar sedes',           'roles' => ['SUPER ADMIN']],
                 ['name' => 'hr.branches.delete', 'action' => 'Eliminar sedes',         'roles' => ['SUPER ADMIN']],
@@ -74,10 +74,24 @@ class SetupRolesAndPermissions extends Command
                 ['name' => 'hr.departments.delete', 'action' => 'Eliminar áreas',         'roles' => ['SUPER ADMIN']],
             ],
 
-            'DATOS INTERNOS' => [
-                ['name' => 'internal.view_factory_consecutive', 'action' => 'Ver consecutivo [FABRICA-N]', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
-                ['name' => 'internal.view_out_consecutive', 'action' => 'Ver consecutivo OUT', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
-                ['name' => 'internal.view_dispatcher', 'action' => 'Ver quién despachó / validó', 'roles' => ['SUPER ADMIN', 'ADMIN', 'ASESOR', 'BODEGA']],
+            'MÓDULO ER (Errores)' => [
+
+                // =========================
+                // REPORTES DE ERROR
+                // =========================
+                ['name' => 'er.reports.view',   'action' => 'Ver listado de reportes de error', 'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'er.reports.create', 'action' => 'Radicar nuevo reporte de error',   'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'er.reports.edit',   'action' => 'Editar reporte de error',          'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'er.reports.delete', 'action' => 'Eliminar reporte de error',        'roles' => ['SUPER ADMIN']],
+
+                // =========================
+                // TIPOS DE ERROR
+                // =========================
+                ['name' => 'er.types.view',   'action' => 'Ver listado de tipos de error',   'roles' => ['SUPER ADMIN', 'ADMIN']],
+                ['name' => 'er.types.create', 'action' => 'Crear tipos de error',            'roles' => ['SUPER ADMIN']],
+                ['name' => 'er.types.edit',   'action' => 'Editar tipos de error',           'roles' => ['SUPER ADMIN']],
+                ['name' => 'er.types.delete', 'action' => 'Eliminar tipos de error',         'roles' => ['SUPER ADMIN']],
+
             ],
         ];
 
