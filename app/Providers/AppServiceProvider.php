@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\HR\Employee;
+use App\Models\Warranties\Customer;
 use App\Observers\HR\EmployeeObserver;
+use App\Observers\Warranties\CustomerObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
 
         //HR
         Employee::observe(EmployeeObserver::class);
+
+        //Warranties
+        Customer::observe(CustomerObserver::class);
     }
 
     /**

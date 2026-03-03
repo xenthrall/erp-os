@@ -18,10 +18,58 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(
+                fn(Builder $query) => $query->with('userable')
+            )
             ->columns([
                 TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable(),
+
+
+                TextColumn::make('email')
+                    ->label('Correo Electrónico')
+                    ->searchable(),
+                TextColumn::make('profile_document')
+                    ->label('Documento')
+                    ->getStateUsing(function ($record) {
+
+                        $profile = $record->userable;
+
+                        if (!$record->userable_type || !$record->userable_id) {
+                            return 'Sin perfil asignado';
+                        }
+
+                        if (!$profile) {
+                            return 'Perfil eliminado o inconsistente';
+                        }
+
+                        return $profile->document_number ?? 'Sin número de documento';
+                    })
+                    ->color(function ($record) {
+
+                        if (!$record->userable_type || !$record->userable_id) {
+                            return 'warning';
+                        }
+
+                        return $record->userable ? 'success' : 'danger';
+                    })
+                    ->tooltip(function ($record) {
+
+                        if (!$record->userable_type || !$record->userable_id) {
+                            return 'Este usuario no tiene ningún perfil asociado';
+                        }
+
+                        if (!$record->userable) {
+                            return 'El perfil asociado fue eliminado pero el usuario conserva la referencia';
+                        }
+
+                        return 'Documento cargado correctamente';
+                    })
+                    ->badge()
+                    ->wrap()
+                    ->toggleable(),
+
                 //Rol de spatie
                 TextColumn::make('roles.name')
                     ->label('Rol')
@@ -33,12 +81,8 @@ class UsersTable
                     ->formatStateUsing(fn(?string $state): string => match ($state) {
                         \App\Models\Warranties\Customer::class => 'Cliente',
                         \App\Models\HR\Employee::class => 'Empleado',
-                        default => 'Sin perfil asignado', 
+                        default => 'Sin perfil asignado',
                     }),
-
-                TextColumn::make('email')
-                    ->label('Correo Electrónico')
-                    ->searchable(),
 
                 IconColumn::make('email_verified_at')
                     ->label('Email Verificado')
@@ -84,6 +128,41 @@ class UsersTable
                     })
                     ->native(false)
                     ->searchable(),
+                SelectFilter::make('profile_status')
+                    ->label('Estado del Perfil')
+                    ->options([
+                        'valid' => 'Perfil válido',
+                        'without' => 'Sin perfil asignado',
+                        'orphan' => 'Perfil eliminado',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+
+                        $value = $data['value'] ?? null;
+
+                        if (!$value) {
+                            return $query;
+                        }
+
+                        return match ($value) {
+
+                            // Perfil correcto
+                            'valid' => $query->whereNotNull('userable_type')
+                                ->whereNotNull('userable_id')
+                                ->whereHas('userable'),
+
+                            // Sin perfil asignado
+                            'without' => $query->whereNull('userable_type')
+                                ->orWhereNull('userable_id'),
+
+                            // Perfil eliminado pero referencia existe
+                            'orphan' => $query->whereNotNull('userable_type')
+                                ->whereNotNull('userable_id')
+                                ->whereDoesntHave('userable'),
+
+                            default => $query,
+                        };
+                    })
+                    ->native(false),
             ])
             ->recordActions([
                 ActionGroup::make([

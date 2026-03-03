@@ -164,6 +164,18 @@ class CustomerResource extends Resource
                 TextColumn::make('phone')
                     ->label('Teléfono')
                     ->searchable(),
+                TextColumn::make('user.email')
+                    ->label('Correo')
+                    ->searchable()
+                    ->default('Sin usuario de ingreso')
+                    ->color(fn($record) => $record->user ? 'success' : 'danger')
+                    ->tooltip(
+                        fn($record) =>
+                        $record->user
+                            ? $record->user->email
+                            : 'Este Cliente no tiene usuario para ingresar al sistema'
+                    )
+                    ->toggleable(),
 
                 TextColumn::make('warranty_requests_count')
                     ->counts('warrantyRequests')

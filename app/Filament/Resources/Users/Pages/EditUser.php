@@ -15,12 +15,19 @@ class EditUser extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->disabled(fn (Model $record): bool => $record->userable_id !== null)
-                ->tooltip(fn (Model $record): ?string => 
-                    $record->userable_id !== null 
-                        ? 'No se puede eliminar porque tiene un perfil (Cliente/Empleado) vinculado.' 
-                        : null
-                ),
+                ->visible(function (Model $record): bool {
+                    $hasTypeAndId = $record->userable_type && $record->userable_id;
+                    if ($hasTypeAndId && $record->userable) {
+                        return false;
+                    }
+                    return true;
+                })
+                ->tooltip(function (Model $record): ?string {
+                    $hasTypeAndId = $record->userable_type && $record->userable_id;
+                    if ($hasTypeAndId && !$record->userable) { return 'Perfil inconsistente detectado. Puedes eliminar este usuario.';}
+                    if (!$hasTypeAndId) { return 'Usuario sin perfil asociado. Puedes eliminarlo.';}
+                    return null;
+                }),
         ];
     }
 }
