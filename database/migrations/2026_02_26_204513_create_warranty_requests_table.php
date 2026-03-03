@@ -15,15 +15,19 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('customer_id')
-                ->constrained('customers');
-                
-            $table->foreignId('user_id')
-                ->constrained('users'); // Quien creó la solicitud
+                ->constrained('customers')
+                ->restrictOnDelete();
+
+            $table->foreignId('user_id')//quien creo la solicitud
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             // Es nullable porque solo se asigna cuando se "interpreta como garantía aceptada"
             $table->foreignId('factory_id')
                 ->nullable()
-                ->constrained('warranty_factories');
+                ->constrained('warranty_factories')
+                ->restrictOnDelete();
 
             $table->unsignedInteger('factory_sequence')
                 ->nullable()
@@ -36,7 +40,7 @@ return new class extends Migration
             $table->string('invoice_number')->nullable();
             $table->string('internal_code')->nullable();
             $table->string('model')->nullable();
-            $table->integer('quantity')->default(1);
+            $table->unsignedInteger('quantity')->default(1);
             $table->string('status')->default('pending'); // pending, approved, rejected
             $table->text('failure_description');
 

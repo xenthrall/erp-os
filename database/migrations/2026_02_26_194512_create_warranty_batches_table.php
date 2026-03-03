@@ -14,13 +14,17 @@ return new class extends Migration
         Schema::create('warranty_batches', function (Blueprint $table) {
             $table->id();
             
-            //rELACION CON EL CLIENTE
             $table->foreignId('customer_id')
-                ->constrained('customers');
+                ->constrained('customers')
+                ->restrictOnDelete();
 
             $table->string('status')->default('draft'); // draft, processing, shipped
-            $table->string('out_sequence')->nullable();
-            $table->string('servientrega_guide')->nullable();
+            $table->string('out_sequence')
+                ->unique()
+                ->nullable();
+            $table->string('servientrega_guide')
+                ->unique()
+                ->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('closed_at')->nullable();
             $table->timestamps();

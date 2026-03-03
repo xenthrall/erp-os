@@ -15,12 +15,21 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('warranty_request_id')
-                ->constrained('warranty_requests');
+                ->constrained('warranty_requests')
+                ->restrictOnDelete();
             $table->foreignId('warranty_batch_id')
-                ->constrained('warranty_batches');
-                
-            $table->integer('quantity_assigned');
+                ->constrained('warranty_batches')
+                ->restrictOnDelete();
+
+            $table->unsignedInteger('quantity_assigned');
             $table->timestamps();
+
+            //Esto garantiza que una garantía solo aparezca una vez por lote
+            $table->unique(
+                ['warranty_request_id', 'warranty_batch_id'],
+                'unique_request_batch'
+            );
+
         });
     }
 

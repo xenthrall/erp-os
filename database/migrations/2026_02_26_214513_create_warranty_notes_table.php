@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('warranty_notes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')
-                ->constrained('users');
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             $table->foreignId('warranty_request_id')
                 ->constrained('warranty_requests')
                 ->cascadeOnDelete();
-                
+
             $table->text('note');
             $table->timestamps();
         });

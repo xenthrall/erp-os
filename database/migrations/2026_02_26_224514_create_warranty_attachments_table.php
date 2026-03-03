@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('warranty_request_id')
                 ->constrained('warranty_requests')
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
 
-            $table->string('path'); // Ruta del archivo en el storage
+            $table->string('type')->default('uncategorized');
+
+            $table->string('path')->unique(); // Ruta del archivo en el storage
             $table->timestamps();
         });
     }
