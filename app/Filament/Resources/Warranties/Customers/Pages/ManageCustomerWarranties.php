@@ -3,9 +3,14 @@
 namespace App\Filament\Resources\Warranties\Customers\Pages;
 
 use App\Enums\Warranties\WarrantyRequestStatus;
+use App\Filament\Actions\Warranties\ApproveWarrantyAction;
+use App\Filament\Actions\Warranties\RejectWarrantyAction;
 use App\Filament\Actions\Warranties\ReviewWarrantyAction;
+use App\Filament\Actions\Warranties\SelectFactoryAction;
+use App\Filament\Actions\Warranties\SetPendingWarrantyAction;
 use App\Filament\Resources\Warranties\Customers\CustomerResource;
 use App\Models\Warranties\WarrantyRequest;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
@@ -36,13 +41,13 @@ class ManageCustomerWarranties extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-       
+
         return $table
             ->query(
                 WarrantyRequest::query()
                     ->where('customer_id', $this->record->id)
                     ->withCount('attachments')
-                    )
+            )
             ->columns([
                 TextColumn::make('customer.first_name')
                     ->label('Cliente')
@@ -60,13 +65,13 @@ class ManageCustomerWarranties extends Page implements HasTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn (WarrantyRequestStatus $state): string => match ($state) {
+                    ->color(fn(WarrantyRequestStatus $state): string => match ($state) {
                         WarrantyRequestStatus::Pending    => 'warning',
                         WarrantyRequestStatus::InReview   => 'info',
                         WarrantyRequestStatus::Approved   => 'success',
                         WarrantyRequestStatus::Rejected   => 'danger',
                     })
-                    ->formatStateUsing(fn (WarrantyRequestStatus $state): string => match ($state) {
+                    ->formatStateUsing(fn(WarrantyRequestStatus $state): string => match ($state) {
                         WarrantyRequestStatus::Pending    => 'Pendiente',
                         WarrantyRequestStatus::InReview   => 'En Revisión',
                         WarrantyRequestStatus::Approved   => 'Aprobada',
@@ -83,7 +88,7 @@ class ManageCustomerWarranties extends Page implements HasTable
                     ->numeric()
                     ->badge()
                     ->color(
-                        fn($state, $record) => ($record->attachments_count>0)
+                        fn($state, $record) => ($record->attachments_count > 0)
                             ? 'success'
                             : 'danger'
                     )
@@ -132,6 +137,35 @@ class ManageCustomerWarranties extends Page implements HasTable
             ])
             ->recordActions([
                 ReviewWarrantyAction::make(),
+                SetPendingWarrantyAction::make(),
+
+                ActionGroup::make([
+                    SelectFactoryAction::make()
+                        ->visible(
+                            fn($record) =>
+                            $record->status !== WarrantyRequestStatus::Pending
+                                && $record->status !== WarrantyRequestStatus::Approved
+                                && $record->status !== WarrantyRequestStatus::Rejected
+                        ),
+
+                    ApproveWarrantyAction::make()
+                        ->visible(
+                            fn($record) =>
+                            $record->status !== WarrantyRequestStatus::Pending
+                                && $record->status !== WarrantyRequestStatus::Approved
+                                && $record->factory_id !== null
+                                && $record->status !== WarrantyRequestStatus::Rejected
+                        ),
+
+                    RejectWarrantyAction::make()
+                        ->visible(
+                            fn($record) =>
+                            $record->status !== WarrantyRequestStatus::Pending
+                                && $record->status !== WarrantyRequestStatus::Approved
+                                && $record->factory_id === null
+                                && $record->status !== WarrantyRequestStatus::Rejected
+                        ),
+                ])
             ])
             ->toolbarActions([
                 // ...

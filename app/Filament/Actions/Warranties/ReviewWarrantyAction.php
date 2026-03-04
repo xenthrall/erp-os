@@ -26,7 +26,7 @@ class ReviewWarrantyAction extends Action
             ->modalHeading('Revisión de Solicitud de Garantía')
             ->modalWidth('7xl')
             ->mountUsing(function (Model $record) {
-                if ($record->status !== WarrantyRequestStatus::InReview) {
+                if ($record->status === WarrantyRequestStatus::Pending) {
                     $record->update([
                         'status' => WarrantyRequestStatus::InReview,
                     ]);
