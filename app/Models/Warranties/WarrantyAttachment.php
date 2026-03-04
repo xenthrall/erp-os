@@ -10,11 +10,13 @@ class WarrantyAttachment extends Model
 {
     protected $fillable = [
         'warranty_request_id',
+        'type',
         'path',
     ];
 
     protected $appends = [
         'size',
+        'url',
     ];
 
     protected static function booted(): void
@@ -24,6 +26,15 @@ class WarrantyAttachment extends Model
                 Storage::disk('public')->delete($attachment->path);
             }
         });
+    }
+
+    public function getUrlAttribute(): ?string
+    {
+        if (! $this->path) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->path);
     }
 
     public function getSizeAttribute(): ?int
