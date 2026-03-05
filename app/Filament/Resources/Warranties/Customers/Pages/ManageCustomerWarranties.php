@@ -137,7 +137,7 @@ class ManageCustomerWarranties extends Page implements HasTable
             ])
             ->recordActions([
                 ReviewWarrantyAction::make(),
-                SetPendingWarrantyAction::make(),
+                //SetPendingWarrantyAction::make(),
 
                 ActionGroup::make([
                     SelectFactoryAction::make()

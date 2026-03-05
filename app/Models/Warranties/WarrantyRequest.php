@@ -34,13 +34,6 @@ class WarrantyRequest extends Model
         'purchase_date' => 'date',
     ];
 
-    protected static function booted(): void
-    {
-        static::deleting(function (WarrantyRequest $warrantyRequest): void {
-            $warrantyRequest->attachments()->get()->each->delete();
-        });
-    }
-
     public function customer(): BelongsTo // customer_id
     {
         return $this->belongsTo(Customer::class, 'customer_id');

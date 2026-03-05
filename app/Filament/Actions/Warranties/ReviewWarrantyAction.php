@@ -167,6 +167,33 @@ class ReviewWarrantyAction extends Action
                                     ])
                                     ->collapsed(false),
                             ]),
+                        Tab::make('Notas')
+                            ->icon(Heroicon::ChatBubbleBottomCenterText)
+                            ->schema([
+                                Section::make('Bitácora de la solicitud')
+                                    ->description('Registro de observaciones y acciones realizadas sobre esta garantía.')
+                                    ->schema([
+                                        RepeatableEntry::make('notes')
+                                            ->hiddenLabel()
+                                            ->schema([
+                                                TextEntry::make('user.name')
+                                                    ->label('Registrado por')
+                                                    ->icon('heroicon-m-user'),
+
+                                                TextEntry::make('created_at')
+                                                    ->label('Fecha')
+                                                    ->dateTime('d M Y H:i')
+                                                    ->icon('heroicon-m-clock'),
+
+                                                TextEntry::make('note')
+                                                    ->label('Observación')
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(2)
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->collapsed(false),
+                            ])
                     ]),
 
             ])
