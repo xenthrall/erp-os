@@ -24,7 +24,7 @@ class SelectFactoryAction extends Action
             ->schema([
                 Select::make('factory_id')
                     ->label('Fábrica')
-                    ->relationship('factory', 'name')
+                    ->relationship('warrantyFactory', 'name')
                     ->searchable()
                     ->preload(),
             ])
@@ -34,7 +34,7 @@ class SelectFactoryAction extends Action
                     'factory_id' => $data['factory_id'],
                 ]);
 
-                $record->load('factory');
+                $record->load('warrantyFactory');
             })
 
             ->successNotificationTitle('Fábrica asignada correctamente');

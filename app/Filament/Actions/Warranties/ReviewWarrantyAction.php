@@ -35,7 +35,7 @@ class ReviewWarrantyAction extends Action
                 $record->load([
                     'customer',
                     'creator',
-                    'factory',
+                    'warrantyFactory',
                     'attachments',
                 ]);
             })

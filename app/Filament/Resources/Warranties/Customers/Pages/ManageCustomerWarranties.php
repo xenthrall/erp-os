@@ -57,7 +57,7 @@ class ManageCustomerWarranties extends Page implements HasTable
                     ->label('Modelo')
                     ->searchable(),
 
-                TextColumn::make('factory.name')
+                TextColumn::make('warrantyFactory.name')
                     ->label('Fábrica')
                     ->placeholder('Pendiente de asignar')
                     ->searchable(),

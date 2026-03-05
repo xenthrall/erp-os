@@ -5,12 +5,15 @@ namespace App\Models\Warranties;
 use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WarrantyRequest extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         'customer_id',
         'user_id',
@@ -44,7 +47,7 @@ class WarrantyRequest extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function factory(): BelongsTo
+    public function warrantyFactory(): BelongsTo
     {
         return $this->belongsTo(WarrantyFactory::class, 'factory_id');
     }
