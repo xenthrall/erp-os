@@ -24,7 +24,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 
 class CustomerResource extends Resource
 {
@@ -103,7 +105,7 @@ class CustomerResource extends Resource
                     ->schema([
                         TextEntry::make('phone')
                             ->label('Teléfono')
-                            ->icon('heroicon-m-phone') 
+                            ->icon('heroicon-m-phone')
                             ->placeholder('-'),
 
                         TextEntry::make('address')
@@ -163,7 +165,7 @@ class CustomerResource extends Resource
                     ->searchable(),
                 TextColumn::make('phone')
                     ->label('Teléfono')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user.email')
                     ->label('Correo')
                     ->searchable()
@@ -175,18 +177,39 @@ class CustomerResource extends Resource
                             ? $record->user->email
                             : 'Este Cliente no tiene usuario para ingresar al sistema'
                     )
-                    ->toggleable(),
-
-                TextColumn::make('warranty_requests_count')
-                    ->counts('warrantyRequests')
-                    ->label('Garantías')
-                    ->badge()
-                    ->color(fn(int $state): string => $state > 0 ? 'info' : 'gray')
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('address')
                     ->label('Dirección')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('warranty_status_summary')
+                    ->label('Garantías')
+                    ->state(fn() => true) // truco para que siempre tenga estado
+                    ->html()
+                    ->tooltip('Pendientes | En revisión | Aprobadas | Rechazadas')
+                    ->formatStateUsing(function ($state, $record) {
+                        return "
+                            <div class='flex items-center gap-2 text-xs'>
+
+                                <div class='flex items-center gap-1 px-2 py-1 rounded-md border border-yellow-200 bg-yellow-50 text-yellow-700'>
+                                    ⏳ <span class='font-semibold'>{$record->warranties_pending_count}</span>
+                                </div>
+
+                                <div class='flex items-center gap-1 px-2 py-1 rounded-md border border-blue-200 bg-blue-50 text-blue-700'>
+                                    🔍 <span class='font-semibold'>{$record->warranties_review_count}</span>
+                                </div>
+
+                                <div class='flex items-center gap-1 px-2 py-1 rounded-md border border-green-200 bg-green-50 text-green-700'>
+                                    ✔ <span class='font-semibold'>{$record->warranties_approved_count}</span>
+                                </div>
+
+                                <div class='flex items-center gap-1 px-2 py-1 rounded-md border border-red-200 bg-red-50 text-red-700'>
+                                    ✖ <span class='font-semibold'>{$record->warranties_rejected_count}</span>
+                                </div>
+
+                            </div>
+                            ";
+                    }),
 
                 IconColumn::make('is_active')
                     ->label('Activo')
@@ -218,6 +241,17 @@ class CustomerResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withWarrantyStatusCounts()
+            ->withMax('warrantyRequests', 'created_at')
+            ->orderByDesc('warranties_pending_count') 
+            ->orderByDesc('warranties_review_count')
+            ->orderByDesc('warranty_requests_max_created_at')
+            ->orderByDesc('created_at');
     }
 
     public static function getPages(): array
