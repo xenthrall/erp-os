@@ -2,6 +2,7 @@
 
 namespace App\Models\Warranties;
 
+use App\Enums\Warranties\WarrantyBatchStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -14,6 +15,12 @@ class WarrantyBatch extends Model
         'servientrega_guide',
         'sent_at',
         'closed_at',
+    ];
+
+    protected $casts = [
+        'status' => WarrantyBatchStatus::class,
+        'sent_at' => 'datetime',
+        'closed_at' => 'datetime',
     ];
 
     public function items(): HasMany

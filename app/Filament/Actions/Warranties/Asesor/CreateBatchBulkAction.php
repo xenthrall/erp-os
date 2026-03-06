@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions\Warranties\Asesor;
 
+use App\Enums\Warranties\WarrantyBatchStatus;
 use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Models\Warranties\WarrantyBatch;
 use App\Models\Warranties\WarrantyBatchItem;
@@ -49,7 +50,7 @@ class CreateBatchBulkAction extends BulkAction
 
                     $batch = WarrantyBatch::create([
                         'customer_id' => $first->customer_id,
-                        'status' => 'pending',
+                        'status' => WarrantyBatchStatus::Draft,
                     ]);
 
                     foreach ($records as $record) {
@@ -57,7 +58,7 @@ class CreateBatchBulkAction extends BulkAction
                         WarrantyBatchItem::create([
                             'warranty_batch_id' => $batch->id,
                             'warranty_request_id' => $record->id,
-                            'quantity_assigned' => 1,
+                            'quantity_assigned' => $record->quantity,
                         ]);
                     }
                 });

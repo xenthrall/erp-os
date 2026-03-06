@@ -14,10 +14,10 @@ class WarrantyBatchItem extends Model
 
     public function request()
     {
-        return $this->belongsTo(WarrantyRequest::class);
+        return $this->belongsTo(WarrantyRequest::class, 'warranty_request_id');
     }
     public function batch()
     {
-        return $this->belongsTo(WarrantyBatch::class);
+        return $this->belongsTo(WarrantyBatch::class, 'warranty_batch_id');
     }
 }
