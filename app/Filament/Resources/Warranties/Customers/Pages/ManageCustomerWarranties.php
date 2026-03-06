@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Warranties\Customers\Pages;
 
 use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Filament\Actions\Warranties\ApproveWarrantyAction;
+use App\Filament\Actions\Warranties\Asesor\CreateBatchBulkAction;
 use App\Filament\Actions\Warranties\RejectWarrantyAction;
 use App\Filament\Actions\Warranties\ReviewWarrantyAction;
 use App\Filament\Actions\Warranties\SelectFactoryAction;
@@ -43,6 +44,10 @@ class ManageCustomerWarranties extends Page implements HasTable
     {
 
         return $table
+            ->checkIfRecordIsSelectableUsing(
+                fn($record) => $record->status === WarrantyRequestStatus::Approved
+            )
+
             ->query(
                 WarrantyRequest::query()
                     ->where('customer_id', $this->record->id)
@@ -168,7 +173,7 @@ class ManageCustomerWarranties extends Page implements HasTable
                 ])
             ])
             ->toolbarActions([
-                // ...
+                CreateBatchBulkAction::make(),
             ]);
     }
 }
