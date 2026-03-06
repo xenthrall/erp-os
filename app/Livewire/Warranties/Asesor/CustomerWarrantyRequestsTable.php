@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Warranties\Customers\Pages;
+namespace App\Livewire\Warranties\Asesor;
 
 use App\Enums\Warranties\WarrantyRequestStatus;
 use App\Filament\Actions\Warranties\ApproveWarrantyAction;
@@ -8,67 +8,38 @@ use App\Filament\Actions\Warranties\Asesor\CreateBatchBulkAction;
 use App\Filament\Actions\Warranties\RejectWarrantyAction;
 use App\Filament\Actions\Warranties\ReviewWarrantyAction;
 use App\Filament\Actions\Warranties\SelectFactoryAction;
-use App\Filament\Resources\Warranties\Customers\CustomerResource;
 use App\Models\Warranties\WarrantyRequest;
 use Filament\Actions\ActionGroup;
-use Filament\Resources\Pages\Concerns\InteractsWithRecord;
-use Filament\Resources\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
+use Livewire\Attributes\On;
 
-class ManageCustomerWarranties extends Page implements HasTable
+class CustomerWarrantyRequestsTable extends TableWidget
 {
-    use InteractsWithTable;
-    use InteractsWithRecord;
+    public $customer;
 
-    #protected static ?string $title = '';
+    protected int | string | array $columnSpan = 'full';
 
-    protected static string $resource = CustomerResource::class;
-
-    protected string $view = 'filament.resources.warranties.customers.pages.manage-customer-warranties';
-
-    public string $activeTab = 'requests';
-
-    public function setTab(string $tab): void
+    protected function getTableHeading(): string
     {
-        $this->activeTab = $tab;
+        return '';
     }
 
-    public function getTitle(): string
+    #[On('warranty-batch-created')]
+    public function refreshBatches()
     {
-        return 'Garantías de ' . $this->record->first_name . ' ' . $this->record->last_name;
-    }
-
-    public function mount(int|string $record): void
-    {
-        $this->record = $this->resolveRecord($record);
+        $this->resetTable();
     }
 
     public function table(Table $table): Table
     {
 
-        return $table
-            ->checkIfRecordIsSelectableUsing(
-                fn($record) => $record->status === WarrantyRequestStatus::Approved
-            )
-
+        return $table         
             ->query(
                 WarrantyRequest::query()
-                    ->where('customer_id', $this->record->id)
-                    ->whereIn('status', [
-                        WarrantyRequestStatus::Pending,
-                        WarrantyRequestStatus::InReview,
-                        WarrantyRequestStatus::Approved,
-                    ])
+                    ->where('customer_id', $this->customer->id)
                     ->withCount('attachments')
-                    ->withSum('batchItems', 'quantity_assigned')
-                    ->where('quantity', '>', function ($query) {
-                        $query->selectRaw('COALESCE(SUM(quantity_assigned), 0)')
-                            ->from('warranty_batch_items')
-                            ->whereColumn('warranty_batch_items.warranty_request_id', 'warranty_requests.id');
-                    })
             )
             ->columns([
                 TextColumn::make('model')
@@ -101,11 +72,6 @@ class ManageCustomerWarranties extends Page implements HasTable
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                TextColumn::make('batch_items_sum_quantity_assigned')
-                    ->label('En lote')
-                    ->default(0)
-                    ->toggleable(isToggledHiddenByDefault: false),
-
                 TextColumn::make('attachments_count')
                     ->label('N° Archivos')
                     ->numeric()
@@ -160,38 +126,9 @@ class ManageCustomerWarranties extends Page implements HasTable
             ])
             ->recordActions([
                 ReviewWarrantyAction::make(),
-                //SetPendingWarrantyAction::make(),
-
-                ActionGroup::make([
-                    SelectFactoryAction::make()
-                        ->visible(
-                            fn($record) =>
-                            $record->status !== WarrantyRequestStatus::Pending
-                                && $record->status !== WarrantyRequestStatus::Approved
-                                && $record->status !== WarrantyRequestStatus::Rejected
-                        ),
-
-                    ApproveWarrantyAction::make()
-                        ->visible(
-                            fn($record) =>
-                            $record->status !== WarrantyRequestStatus::Pending
-                                && $record->status !== WarrantyRequestStatus::Approved
-                                && $record->factory_id !== null
-                                && $record->status !== WarrantyRequestStatus::Rejected
-                        ),
-
-                    RejectWarrantyAction::make()
-                        ->visible(
-                            fn($record) =>
-                            $record->status !== WarrantyRequestStatus::Pending
-                                && $record->status !== WarrantyRequestStatus::Approved
-                                && $record->factory_id === null
-                                && $record->status !== WarrantyRequestStatus::Rejected
-                        ),
-                ])
             ])
             ->toolbarActions([
-                CreateBatchBulkAction::make(),
+                //
             ]);
     }
 }
