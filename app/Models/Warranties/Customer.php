@@ -2,6 +2,7 @@
 
 namespace App\Models\Warranties;
 
+use App\Enums\Warranties\CustomerType;
 use App\Enums\Warranties\WarrantyRequestStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,7 +22,13 @@ class Customer extends Model
         'document_number',
         'phone',
         'address',
+        'customer_type',
         'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'customer_type' => CustomerType::class, 
     ];
 
     /**

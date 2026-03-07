@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('phone', 20)->nullable();
             $table->string('address')->nullable();
 
+            $table->string('customer_type', 30)->default('regular');
+
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -2,14 +2,12 @@
 
 namespace App\Filament\Resources\Warranties\Customers;
 
+use App\Enums\Warranties\CustomerType;
 use App\Filament\Resources\Warranties\Customers\Pages\ManageCustomers;
 use App\Models\Warranties\Customer;
-use BackedEnum;
-use Dom\Text;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -20,14 +18,11 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
-
 class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
@@ -68,9 +63,16 @@ class CustomerResource extends Resource
                     ->label('Teléfono')
                     ->prefix('+57')
                     ->maxLength(10),
+                Select::make('customer_type')
+                    ->label('Tipo de Cliente')
+                    ->options(CustomerType::class)
+                    ->default(CustomerType::Regular)
+                    ->required(),
+
                 TextInput::make('address')
                     ->label('Dirección')
-                    ->placeholder('Calle 123 #45-67'),
+                    ->placeholder('Calle 123 #45-67')
+                    ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true)
@@ -122,6 +124,11 @@ class CustomerResource extends Resource
                             ->label('Número de Garantías')
                             ->badge()
                             ->color(fn(int $state): string => $state > 0 ? 'info' : 'gray'),
+                        TextEntry::make('customer_type')
+                            ->label('Tipo de Cliente')
+                            ->badge()
+                            ->formatStateUsing(fn($state) => $state->label())
+                            ->color(fn($state) => $state->color()),
 
                         IconEntry::make('is_active')
                             ->label('Cuenta Activa')
@@ -178,6 +185,13 @@ class CustomerResource extends Resource
                             : 'Este Cliente no tiene usuario para ingresar al sistema'
                     )
                     ->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('customer_type')
+                    ->label('Tipo')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => $state->label())
+                    ->color(fn($state) => $state->color())
+                    ->toggleable(isToggledHiddenByDefault: false),
+
                 TextColumn::make('address')
                     ->label('Dirección')
                     ->searchable()
@@ -248,7 +262,7 @@ class CustomerResource extends Resource
         return parent::getEloquentQuery()
             ->withWarrantyStatusCounts()
             ->withMax('warrantyRequests', 'created_at')
-            ->orderByDesc('warranties_pending_count') 
+            ->orderByDesc('warranties_pending_count')
             ->orderByDesc('warranties_review_count')
             ->orderByDesc('warranty_requests_max_created_at')
             ->orderByDesc('created_at');
